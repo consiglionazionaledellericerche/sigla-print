@@ -1,5 +1,3 @@
 target/
 src/
 !target/*.jar
-target/*sources.jar
-target/*javadoc.jar
