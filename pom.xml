@@ -5,7 +5,7 @@
 
 	<artifactId>sigla-print</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>sigla-print</name>
 	<description>sigla print server</description>
@@ -27,7 +27,6 @@
 <dependencyManagement>
      <dependencies>
         <dependency>
-            <!-- Import dependency management from Spring Boot -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-dependencies</artifactId>
             <version>${spring-boot.version}</version>
@@ -44,10 +43,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 		<dependency>
@@ -58,13 +53,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
-
-
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
@@ -112,6 +100,15 @@
                   <mainClass>${start-class}</mainClass>
               </configuration>
           </plugin>
+           <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <packagingExcludes>WEB-INF/lib/tomcat-*.jar</packagingExcludes>
+                </configuration>
+            </plugin>
+
       </plugins>
   </pluginManagement>
 		<plugins>

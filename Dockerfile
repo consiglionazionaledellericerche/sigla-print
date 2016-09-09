@@ -2,9 +2,9 @@
 FROM anapsix/alpine-java:jdk8
 MAINTAINER Francesco Uliana <francesco.uliana@cnr.it>
 
-COPY target/*SNAPSHOT.jar /opt/sigla-print.jar
+COPY target/*SNAPSHOT.war /opt/sigla-print.war
 
 EXPOSE 8080
 
 # https://spring.io/guides/gs/spring-boot-docker/#_containerize_it
-CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/opt/sigla-print.jar"]
+CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/opt/sigla-print.war"]
