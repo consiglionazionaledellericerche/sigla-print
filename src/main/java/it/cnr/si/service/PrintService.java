@@ -1,5 +1,6 @@
 package it.cnr.si.service;
 
+import it.cnr.si.exception.JasperRuntimeException;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.ExporterInput;
@@ -64,7 +65,7 @@ public class PrintService {
         try {
             exporter.exportReport();
         } catch (JRException e) {
-            throw new RuntimeException("unable to export report " + id, e);
+            throw new JasperRuntimeException("unable to export report " + id, e);
         }
 
         return outputStream;
@@ -75,7 +76,7 @@ public class PrintService {
             return JasperFillManager.fillReport(jasperReport,
                         parameters);
         } catch (JRException e) {
-            throw new RuntimeException("unable to process report", e);
+            throw new JasperRuntimeException("unable to process report", e);
         }
     }
 
@@ -83,7 +84,7 @@ public class PrintService {
         try {
             return JasperCompileManager.compileReport(report.getInputStream());
         } catch (IOException | JRException e) {
-            throw new RuntimeException("unable to compile report id " + id, e);
+            throw new JasperRuntimeException("unable to compile report id " + id, e);
         }
     }
 
