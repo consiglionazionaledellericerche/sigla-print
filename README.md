@@ -1,7 +1,5 @@
-# TODO
-
-cambiare parent > archetype
-
+Sigla print
+===
 
 # Usage
 
