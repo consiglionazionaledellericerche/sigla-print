@@ -26,6 +26,7 @@ public class FooRepositoryTest {
     @Autowired
     private FooRepository fooRepository;
 
+
     @Test
     public void testFoo() {
 

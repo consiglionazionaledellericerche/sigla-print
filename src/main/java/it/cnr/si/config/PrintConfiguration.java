@@ -21,8 +21,8 @@ public class PrintConfiguration {
 
     public PrintConfiguration(PrintService printService) {
         this.printService = printService;
-
     }
+
 
     @Scheduled(fixedDelayString = "${scheduler.print}")
     public void printScheduler() {

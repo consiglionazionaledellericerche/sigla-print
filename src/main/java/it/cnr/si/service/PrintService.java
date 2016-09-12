@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,9 @@ public class PrintService {
 
     @Value("classpath:/FirstJasper.jrxml")
     private Resource report;
+
+    @Autowired
+    private Connection connection;
 
     private final CounterService counterService;
 
@@ -48,7 +52,7 @@ public class PrintService {
 
         JasperReport jasperReport = jasperReport(id);
 
-        JasperPrint print = getJasperPrint(jasperReport, new HashMap<>());
+        JasperPrint print = getJasperPrint(jasperReport, new HashMap<>(), connection);
 
         JRPdfExporter exporter = new JRPdfExporter();
 
@@ -71,10 +75,12 @@ public class PrintService {
         return outputStream;
     }
 
-    private JasperPrint getJasperPrint(JasperReport jasperReport, Map<String, Object> parameters)  {
+    private JasperPrint getJasperPrint(JasperReport jasperReport, Map<String, Object> parameters, Connection connection)  {
+
+        LOGGER.info("connection = {}", connection);
         try {
             return JasperFillManager.fillReport(jasperReport,
-                        parameters);
+                        parameters, connection);
         } catch (JRException e) {
             throw new JasperRuntimeException("unable to process report", e);
         }
