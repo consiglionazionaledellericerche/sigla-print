@@ -1,0 +1,9 @@
+security.user:
+  name: foo
+  password: bar
+
+management.info.git.mode: full
+
+spring.application.name: sigla-print
+
+scheduler.print: 10000
