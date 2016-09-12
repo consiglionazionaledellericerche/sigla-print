@@ -7,3 +7,8 @@ management.info.git.mode: full
 spring.application.name: sigla-print
 
 scheduler.print: 10000
+
+spring.jpa:
+  properties.hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+  hibernate.ddl-auto: none # update per generazione schema
+# spring.jpa.database-platform=org.hibernate.dialect.Oracle10gDialect

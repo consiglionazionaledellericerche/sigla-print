@@ -1,4 +1,4 @@
-package it.cnr.si;
+package it.cnr.si.config;
 
 import it.cnr.si.service.PrintService;
 import org.slf4j.Logger;
