@@ -19,7 +19,7 @@ public class Foo {
     private String title;
 
     public Foo() {
-
+        // why JPA ?!?
     }
 
     public Foo(String title) {
