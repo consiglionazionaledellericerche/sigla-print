@@ -1,5 +1,7 @@
 package it.cnr.si.service;
 
+import it.cnr.si.domain.Foo;
+import it.cnr.si.repository.FooRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,13 @@ public class PrintServiceTest {
     @Autowired
     private PrintService printService;
 
+    @Autowired
+    private FooRepository fooRepository;
+
     @Test
     public void print() throws Exception {
+
+        fooRepository.save(new Foo("titolone"));
         ByteArrayOutputStream baos = printService.print(1234l);
         assertEquals(919, baos.size());
     }
