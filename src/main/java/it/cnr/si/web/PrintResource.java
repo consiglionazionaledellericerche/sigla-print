@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,7 +44,7 @@ public class PrintResource {
         headers.add("content-disposition", "inline;filename=" +
                 fileName);
 
-        ByteArrayOutputStream outputStream = printService.print(printRequest.getId());
+        ByteArrayOutputStream outputStream = printService.print(printRequest.getPath());
 
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);
@@ -64,24 +62,16 @@ public class PrintResource {
         Function<Function<Commit, List<String>>, Stream<String>> files =
                 (mapper)  -> hookRequest.getCommits().stream().map(mapper).flatMap(Collection::stream);
 
-        List<String> l = Stream.of(files.apply(Commit::getRemoved), files.apply(Commit::getAdded), files.apply(Commit::getModified))
+        Stream.of(files.apply(Commit::getRemoved), files.apply(Commit::getAdded), files.apply(Commit::getModified))
                 .flatMap(s -> s)
                 .distinct()
                 .sorted()
-                .collect(Collectors.toList());
+                .peek(LOGGER::info)
+                .forEach(path -> printService.evict(path));
 
-        //TODO: invalidare la cache...
-        LOGGER.info("files to update: {}", l);
-
-        return ResponseEntity.ok("helo");
+        return ResponseEntity.ok("done");
     }
 
-
-
-    @GetMapping("/")
-    public ResponseEntity<String> get() {
-        return ResponseEntity.ok(printService.jasperReport(new Random().nextInt(4)).toString());
-    }
 
 
 

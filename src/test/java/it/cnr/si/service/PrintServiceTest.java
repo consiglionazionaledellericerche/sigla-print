@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 @SpringBootTest
 public class PrintServiceTest {
 
+    public static final String ID = "reports/logs/batchlog.jrxml";
     @Autowired
     private PrintService printService;
 
@@ -30,7 +31,7 @@ public class PrintServiceTest {
     public void print() throws Exception {
 
         fooRepository.save(new Foo("titolone"));
-        ByteArrayOutputStream baos = printService.print(1234l);
+        ByteArrayOutputStream baos = printService.print("foo-1234");
         assertEquals(919, baos.size());
     }
 
@@ -38,10 +39,13 @@ public class PrintServiceTest {
     @Test
     public void testCache() {
 
-        printService.jasperReport(123);
-        printService.jasperReport(123);
-        printService.jasperReport(123);
-        printService.jasperReport(123);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+        printService.evict(ID);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
 
     }
 

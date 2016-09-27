@@ -7,17 +7,20 @@ import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.CounterService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,12 +33,21 @@ import java.util.Map;
 public class PrintService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrintService.class);
-
-    @Value("classpath:/FirstJasper.jrxml")
-    private Resource report;
+    public static final String JASPER_CACHE = "jasper-cache";
 
     @Autowired
     private Connection connection;
+
+    @Value("${cnr.gitlab.url}")
+    private String gitlabUrl;
+
+
+    @Value("${cnr.gitlab.token}")
+    private String gitlabToken;
+
+
+
+    private RestTemplate restTemplate = new RestTemplate();
 
     private final CounterService counterService;
 
@@ -45,11 +57,11 @@ public class PrintService {
     }
 
 
-    public ByteArrayOutputStream print(long id) {
+    public ByteArrayOutputStream print(String id) {
 
         this.counterService.increment("services.system.PrintService.invoked");
 
-        LOGGER.info(report.getFilename());
+//        LOGGER.info(report.getFilename());
 
         JasperReport jasperReport = jasperReport(id);
 
@@ -88,14 +100,27 @@ public class PrintService {
     }
 
 
+    @CacheEvict(JASPER_CACHE)
+    public void evict(String key) {
+        LOGGER.info("evicted {}", key);
+    }
 
-    @Cacheable("print")
-    public JasperReport jasperReport(long id) {
-        LOGGER.info("creating jasper report: {}", id);
+
+    @Cacheable(JASPER_CACHE)
+    public JasperReport jasperReport(String key) {
+
+        String jrxml = restTemplate.getForObject(gitlabUrl + key + "?private_token={private_token}",
+                String.class, gitlabToken);
+
+        LOGGER.debug(jrxml);
+
+        LOGGER.info("creating jasper report: {}", key);
+
         try {
-            return JasperCompileManager.compileReport(report.getInputStream());
-        } catch (IOException | JRException e) {
-            throw new JasperRuntimeException("unable to compile report id " + id, e);
+            InputStream inputStream = IOUtils.toInputStream(jrxml, Charset.defaultCharset());
+            return JasperCompileManager.compileReport(inputStream);
+        } catch (JRException e) {
+            throw new JasperRuntimeException("unable to compile report id " + key, e);
         }
     }
 

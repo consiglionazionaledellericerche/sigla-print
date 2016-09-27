@@ -6,4 +6,8 @@ management.info.git.mode: full
 
 spring.application.name: sigla-print
 
-scheduler.print: 10000
+scheduler.print: 60000
+
+cnr.gitlab:
+  url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/
+  token: TyB9NvodV1sDyroHF4zQ
