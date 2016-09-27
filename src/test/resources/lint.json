@@ -1,0 +1,77 @@
+{
+	"object_kind": "push",
+	"event_name": "push",
+	"before": "d47b3a68ce9350411f59a3efda4e3a558a7cd7e6",
+	"after": "479615c25ed568e93050887ab997ae92a1b158bb",
+	"ref": "refs/heads/master",
+	"checkout_sha": "479615c25ed568e93050887ab997ae92a1b158bb",
+	"message": null,
+	"user_id": 3,
+	"user_name": "ULIANA FRANCESCO",
+	"user_email": "francesco.uliana@cnr.it",
+	"user_avatar": "http://git.si.cnr.it/uploads/user/avatar/3/HankScorpio.jpg",
+	"project_id": 117,
+	"project": {
+		"name": "catapult",
+		"description": "",
+		"web_url": "http://git.si.cnr.it/devops/catapult",
+		"avatar_url": "http://git.si.cnr.it/uploads/project/avatar/117/481563-catapult.jpg",
+		"git_ssh_url": "git@git.si.cnr.it:devops/catapult.git",
+		"git_http_url": "http://git.si.cnr.it/devops/catapult.git",
+		"namespace": "devops",
+		"visibility_level": 10,
+		"path_with_namespace": "devops/catapult",
+		"default_branch": "master",
+		"homepage": "http://git.si.cnr.it/devops/catapult",
+		"url": "git@git.si.cnr.it:devops/catapult.git",
+		"ssh_url": "git@git.si.cnr.it:devops/catapult.git",
+		"http_url": "http://git.si.cnr.it/devops/catapult.git"
+	},
+	"commits": [{
+		"id": "479615c25ed568e93050887ab997ae92a1b158bb",
+		"message": "metrics-spring.version upgrade\n",
+		"timestamp": "2016-09-22T14:43:00+02:00",
+		"url": "http://git.si.cnr.it/devops/catapult/commit/479615c25ed568e93050887ab997ae92a1b158bb",
+		"author": {
+			"name": "Francesco Uliana",
+			"email": "francesco.uliana@cnr.it"
+		},
+		"added": ["foo.xml"],
+		"modified": ["pom.xml"],
+		"removed": ["bar.xml"]
+	}, {
+		"id": "ebb3298e291ec69c7f0a9ff8eeeb285069852cd3",
+		"message": "deps upgrade\n",
+		"timestamp": "2016-09-22T14:29:52+02:00",
+		"url": "http://git.si.cnr.it/devops/catapult/commit/ebb3298e291ec69c7f0a9ff8eeeb285069852cd3",
+		"author": {
+			"name": "Francesco Uliana",
+			"email": "francesco.uliana@cnr.it"
+		},
+		"added": [],
+		"modified": ["pom.xml"],
+		"removed": []
+	}, {
+		"id": "d47b3a68ce9350411f59a3efda4e3a558a7cd7e6",
+		"message": "fix HTML\n",
+		"timestamp": "2016-09-05T11:13:45+02:00",
+		"url": "http://git.si.cnr.it/devops/catapult/commit/d47b3a68ce9350411f59a3efda4e3a558a7cd7e6",
+		"author": {
+			"name": "Francesco Uliana",
+			"email": "francesco.uliana@cnr.it"
+		},
+		"added": [],
+		"modified": ["src/main/resources/static/views/home.html"],
+		"removed": []
+	}],
+	"total_commits_count": 3,
+	"repository": {
+		"name": "catapult",
+		"url": "git@git.si.cnr.it:devops/catapult.git",
+		"description": "",
+		"homepage": "http://git.si.cnr.it/devops/catapult",
+		"git_http_url": "http://git.si.cnr.it/devops/catapult.git",
+		"git_ssh_url": "git@git.si.cnr.it:devops/catapult.git",
+		"visibility_level": 10
+	}
+}
