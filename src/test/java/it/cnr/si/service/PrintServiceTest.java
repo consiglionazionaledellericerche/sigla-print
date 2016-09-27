@@ -34,4 +34,15 @@ public class PrintServiceTest {
         assertEquals(919, baos.size());
     }
 
+
+    @Test
+    public void testCache() {
+
+        printService.jasperReport(123);
+        printService.jasperReport(123);
+        printService.jasperReport(123);
+        printService.jasperReport(123);
+
+    }
+
 }

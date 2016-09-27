@@ -1,8 +1,13 @@
 package it.cnr.si.config;
 
+import com.hazelcast.config.Config;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.spring.cache.HazelcastCacheManager;
 import it.cnr.si.service.PrintService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -35,5 +40,22 @@ public class PrintConfiguration {
                 .forEach(printService::print);
 
     }
+
+
+    @Bean
+    public Config config() {
+        Config config = new Config();
+        config.setInstanceName("sigla-print-server");
+        return config;
+    }
+
+          @Bean
+      public CacheManager cacheManager(HazelcastInstance hazelcastInstance) {
+              HazelcastCacheManager cacheManager = new HazelcastCacheManager(hazelcastInstance);
+          return cacheManager;
+      }
+
+
+
 
 }
