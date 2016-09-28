@@ -1,12 +1,15 @@
 package it.cnr.si.service;
 
+import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.exception.JasperRuntimeException;
+import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +32,7 @@ import java.util.Map;
  */
 
 @Service
+
 public class PrintService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrintService.class);
@@ -36,6 +43,9 @@ public class PrintService {
     @Autowired
     private Connection connection;
 
+    @Autowired
+    private PrintRepository printRepository;
+
     private final CounterService counterService;
 
     @Autowired
@@ -43,11 +53,18 @@ public class PrintService {
         this.counterService = counterService;
     }
 
-
+    @Transactional(readOnly = true)
     public ByteArrayOutputStream print(long id) {
 
         this.counterService.increment("services.system.PrintService.invoked");
 
+        Long pgStampa = printRepository.findReportToExecute(9, getInitDate(), getFinalDate());
+        
+        PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
+        
+        LOGGER.info(printSpooler.getReport());
+        
+        
         LOGGER.info(report.getFilename());
 
         JasperReport jasperReport = jasperReport(id);
@@ -93,5 +110,20 @@ public class PrintService {
             throw new JasperRuntimeException("unable to compile report id " + id, e);
         }
     }
+    
+	private Date getInitDate(){
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		LOGGER.info("InitDate " + cal.getTime());
+		return cal.getTime();
+	}
 
+	private Date getFinalDate(){
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		LOGGER.info("FinalDate " + cal.getTime());
+		return cal.getTime();
+	}
 }

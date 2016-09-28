@@ -1,12 +1,16 @@
 package it.cnr.si.config;
 
 import it.cnr.si.service.PrintService;
+
+import java.util.Calendar;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import java.util.stream.Stream;
 
 /**
  * Created by francesco on 12/09/16.
@@ -16,8 +20,14 @@ import java.util.stream.Stream;
 public class PrintConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrintConfiguration.class);
-
+    @Autowired
     private PrintService printService;
+    
+    @Autowired
+    private QueueService queueService;
+    
+    @Value("#{'${queue.sigla.priorita}'.split(',')}")
+    private List<String> queuePriorita;
 
     public PrintConfiguration(PrintService printService) {
         this.printService = printService;
@@ -26,14 +36,10 @@ public class PrintConfiguration {
 
     @Scheduled(fixedDelayString = "${scheduler.print}")
     public void printScheduler() {
-
-        LOGGER.warn("recuperare id stampa da coda");
-
-        Stream
-                .of(1L,100L,200L,12345L)
-                .peek(id -> LOGGER.info("print {}", id))
-                .forEach(printService::print);
-
+        LOGGER.info("Start scheduler at {}", Calendar.getInstance());
+    	for (String priorita : queuePriorita) {
+    		queueService.queuePrintApplication(priorita);
+		}
     }
 
 }

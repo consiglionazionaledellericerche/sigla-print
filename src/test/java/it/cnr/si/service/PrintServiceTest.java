@@ -1,7 +1,7 @@
 package it.cnr.si.service;
 
 import it.cnr.si.domain.Foo;
-import it.cnr.si.repository.FooRepository;
+import it.cnr.si.repository.PrintRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class PrintServiceTest {
     private PrintService printService;
 
     @Autowired
-    private FooRepository fooRepository;
+    private PrintRepository fooRepository;
 
     @Test
     public void print() throws Exception {

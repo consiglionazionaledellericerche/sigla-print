@@ -24,7 +24,7 @@ public class FooRepositoryTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(FooRepositoryTest.class);
 
     @Autowired
-    private FooRepository fooRepository;
+    private PrintRepository fooRepository;
 
 
     @Test

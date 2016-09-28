@@ -7,3 +7,11 @@ management.info.git.mode: full
 spring.application.name: sigla-print
 
 scheduler.print: 10000
+
+hazelcast.members: 127.0.0.1
+hazelcast.port: 5601
+hazelcast.multicast.port: 56327
+hazelcast.instance.name: sigla-print
+hazelcast.mancenter: http://127.0.0.1
+
+queue.sigla.priorita: 1,2,3
