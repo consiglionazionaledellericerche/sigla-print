@@ -38,7 +38,7 @@ public class PrintConfiguration {
         Stream
                 .of(1L, 100L, 200L, 12345L)
                 .peek(id -> LOGGER.info("print {}", id))
-                .map(n -> "scheduler-key-" + n)
+                .map(path -> printService.jasperReport("???" + path))
                 .forEach(printService::print);
 
     }

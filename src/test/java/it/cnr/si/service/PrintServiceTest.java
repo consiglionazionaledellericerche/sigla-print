@@ -2,6 +2,7 @@ package it.cnr.si.service;
 
 import it.cnr.si.domain.Foo;
 import it.cnr.si.repository.FooRepository;
+import net.sf.jasperreports.engine.JasperReport;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,9 @@ public class PrintServiceTest {
     public void print() throws Exception {
 
         fooRepository.save(new Foo("titolone"));
-        ByteArrayOutputStream baos = printService.print("foo-1234");
+
+        JasperReport jasperReport = printService.jasperReport("foo-123");
+        ByteArrayOutputStream baos = printService.print(jasperReport);
         assertEquals(919, baos.size());
     }
 

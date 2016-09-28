@@ -57,13 +57,9 @@ public class PrintService {
     }
 
 
-    public ByteArrayOutputStream print(String id) {
+    public ByteArrayOutputStream print(JasperReport jasperReport) {
 
         this.counterService.increment("services.system.PrintService.invoked");
-
-//        LOGGER.info(report.getFilename());
-
-        JasperReport jasperReport = jasperReport(id);
 
         JasperPrint print = getJasperPrint(jasperReport, new HashMap<>(), connection);
 
@@ -82,7 +78,7 @@ public class PrintService {
         try {
             exporter.exportReport();
         } catch (JRException e) {
-            throw new JasperRuntimeException("unable to export report " + id, e);
+            throw new JasperRuntimeException("unable to export report " + jasperReport.toString(), e);
         }
 
         return outputStream;
@@ -100,24 +96,24 @@ public class PrintService {
     }
 
 
-    @CacheEvict(JASPER_CACHE)
+    @CacheEvict(cacheNames = JASPER_CACHE, key = "#key")
     public void evict(String key) {
         LOGGER.info("evicted {}", key);
     }
 
 
-    @Cacheable(JASPER_CACHE)
+    @Cacheable(cacheNames = JASPER_CACHE, key = "#key")
     public JasperReport jasperReport(String key) {
 
-        String jrxml = restTemplate.getForObject(gitlabUrl + key + "?private_token={private_token}",
+        String jrXml = restTemplate.getForObject(gitlabUrl + key + "?private_token={private_token}",
                 String.class, gitlabToken);
 
-        LOGGER.debug(jrxml);
+        LOGGER.debug(jrXml);
 
         LOGGER.info("creating jasper report: {}", key);
 
         try {
-            InputStream inputStream = IOUtils.toInputStream(jrxml, Charset.defaultCharset());
+            InputStream inputStream = IOUtils.toInputStream(jrXml, Charset.defaultCharset());
             return JasperCompileManager.compileReport(inputStream);
         } catch (JRException e) {
             throw new JasperRuntimeException("unable to compile report id " + key, e);

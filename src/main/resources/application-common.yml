@@ -11,3 +11,7 @@ scheduler.print: 60000
 cnr.gitlab:
   url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/
   token: TyB9NvodV1sDyroHF4zQ
+
+logging.level.it.cnr: DEBUG
+logging.level.org.springframework.cache: TRACE
+logging.pattern.console: "%date |%-5level| [%thread] [%file:%line] - %msg%n%ex{full}"

@@ -4,6 +4,7 @@ import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
 import it.cnr.si.dto.PrintRequest;
 import it.cnr.si.service.PrintService;
+import net.sf.jasperreports.engine.JasperReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,10 @@ public class PrintResource {
         headers.add("content-disposition", "inline;filename=" +
                 fileName);
 
-        ByteArrayOutputStream outputStream = printService.print(printRequest.getPath());
+        String path = printRequest.getPath();
+        JasperReport jasperReport = printService.jasperReport(path);
+
+        ByteArrayOutputStream outputStream = printService.print(jasperReport);
 
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);
@@ -67,7 +71,7 @@ public class PrintResource {
                 .distinct()
                 .sorted()
                 .peek(LOGGER::info)
-                .forEach(path -> printService.evict(path));
+                .forEach(printService::evict);
 
         return ResponseEntity.ok("done");
     }

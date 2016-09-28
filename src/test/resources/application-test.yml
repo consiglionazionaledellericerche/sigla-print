@@ -7,5 +7,3 @@ spring.datasource:
   username: sa
   password:
   driverClassName: org.h2.Driver
-
-logging.level.it.cnr: DEBUG
