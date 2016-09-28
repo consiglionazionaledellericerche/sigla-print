@@ -36,7 +36,7 @@
 			"name": "Francesco Uliana",
 			"email": "francesco.uliana@cnr.it"
 		},
-		"added": ["foo.xml"],
+		"added": ["foo.xml", "reports/logs/batchlog.jrxml"],
 		"modified": ["pom.xml"],
 		"removed": ["bar.xml"]
 	}, {
