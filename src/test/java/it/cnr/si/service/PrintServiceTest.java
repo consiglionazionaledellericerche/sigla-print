@@ -1,16 +1,17 @@
 package it.cnr.si.service;
 
-import it.cnr.si.domain.Foo;
+import static org.junit.Assert.assertEquals;
 import it.cnr.si.repository.PrintRepository;
+
+import java.io.ByteArrayOutputStream;
+
+import net.sf.jasperreports.engine.JasperReport;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.ByteArrayOutputStream;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by francesco on 09/09/16.
@@ -20,18 +21,33 @@ import static org.junit.Assert.assertEquals;
 @SpringBootTest
 public class PrintServiceTest {
 
+    public static final String ID = "reports/logs/batchlog.jrxml";
     @Autowired
     private PrintService printService;
 
     @Autowired
-    private PrintRepository fooRepository;
+    private PrintRepository printRepository;
 
     @Test
     public void print() throws Exception {
 
-        fooRepository.save(new Foo("titolone"));
-        ByteArrayOutputStream baos = printService.print(1234l);
+        JasperReport jasperReport = printService.jasperReport("foo-123");
+        ByteArrayOutputStream baos = printService.print(jasperReport);
         assertEquals(919, baos.size());
+    }
+
+
+    @Test
+    public void testCache() {
+
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+        printService.evict(ID);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+        printService.jasperReport(ID);
+
     }
 
 }

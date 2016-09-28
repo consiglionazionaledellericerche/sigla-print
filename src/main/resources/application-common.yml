@@ -6,12 +6,14 @@ management.info.git.mode: full
 
 spring.application.name: sigla-print
 
-scheduler.print: 10000
-
-hazelcast.members: 127.0.0.1
-hazelcast.port: 5601
-hazelcast.multicast.port: 56327
-hazelcast.instance.name: sigla-print
-hazelcast.mancenter: http://127.0.0.1
+scheduler.print: 60000
 
 queue.sigla.priorita: 1,2,3
+
+cnr.gitlab:
+  url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/
+  token: TyB9NvodV1sDyroHF4zQ
+
+logging.level.it.cnr: DEBUG
+logging.level.org.springframework.cache: TRACE
+logging.pattern.console: "%date |%-5level| [%thread] [%file:%line] - %msg%n%ex{full}"
