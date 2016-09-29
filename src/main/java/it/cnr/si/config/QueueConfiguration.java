@@ -1,6 +1,9 @@
 package it.cnr.si.config;
 
+import it.cnr.si.service.PrintService;
+
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +19,7 @@ import com.hazelcast.core.ItemListener;
 
 @Configuration
 public class QueueConfiguration implements InitializingBean{
-    private static final String SIGLA_PRIORITA = "SIGLA_PRIORITA";
+    private static final String SIGLA_PRIORITA = "SIGLA_PRIORITA_";
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueConfiguration.class);    
 
     @Value("#{'${queue.sigla.priorita}'.split(',')}")
@@ -24,6 +27,9 @@ public class QueueConfiguration implements InitializingBean{
     
     @Autowired
     private HazelcastInstance hazelcastInstance;
+    
+    @Autowired
+    private PrintService printService;
     
     public IQueue<String> queuePrintApplication(String priorita) {
         return hazelcastInstance.getQueue(SIGLA_PRIORITA.concat(priorita));
@@ -40,7 +46,7 @@ public class QueueConfiguration implements InitializingBean{
                 LOGGER.info("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
                     LOGGER.info("PrintApplicationListener consuming {}", priorita);
-                    //printService.print(Integer.valueOf(priorita));
+                    Optional.ofNullable(printService.print(Integer.valueOf(priorita))).map(map -> printService.executeReport(map));
                     LOGGER.info("PrintApplicationListener consumed {}", priorita);
                 }
             }
@@ -53,5 +59,4 @@ public class QueueConfiguration implements InitializingBean{
             queuePrintApplication(priorita).addItemListener(printApplicationListener, true);			
 		}		
 	}
-    
 }

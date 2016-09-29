@@ -30,7 +30,7 @@ public class PrintConfiguration {
     public void printScheduler() {
         LOGGER.info("Start scheduler at {}", ZonedDateTime.now());
     	for (String priorita : queuePriorita) {
-    		queueConfiguration.queuePrintApplication(priorita);
+    		queueConfiguration.queuePrintApplication(priorita).add(priorita);
 		}
     }
 
