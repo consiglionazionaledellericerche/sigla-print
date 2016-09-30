@@ -1,10 +1,17 @@
 package it.cnr.si.web;
 
+import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
-import it.cnr.si.dto.PrintRequest;
 import it.cnr.si.service.PrintService;
-import net.sf.jasperreports.engine.JasperReport;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by francesco on 09/09/16.
@@ -36,19 +36,15 @@ public class PrintResource {
     private PrintService printService;
 
     @PostMapping("/api/v1/print")
-    public ResponseEntity<byte[]> print(@RequestBody PrintRequest printRequest) {
-        LOGGER.info("print request: {}", printRequest);
+    public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
+        LOGGER.info("print request: {}", printSpooler);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
-        String fileName = printRequest.getName();
+        String fileName = printSpooler.getName();
         headers.add("content-disposition", "inline;filename=" +
                 fileName);
-
-        String path = printRequest.getPath();
-        JasperReport jasperReport = printService.jasperReport(path);
-
-        ByteArrayOutputStream outputStream = printService.print(jasperReport);
+        ByteArrayOutputStream outputStream = printService.executeReport(printSpooler);
 
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);

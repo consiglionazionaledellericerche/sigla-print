@@ -386,4 +386,8 @@ public class PrintSpooler {
 	public void setParams(Set<PrintSpoolerParam> params) {
 		this.params = params;
 	}
+
+	public String getName() {
+		return null;
+	}
 }

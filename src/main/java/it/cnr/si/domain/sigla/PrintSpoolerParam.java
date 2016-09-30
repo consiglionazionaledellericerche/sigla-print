@@ -1,7 +1,5 @@
 package it.cnr.si.domain.sigla;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -30,6 +28,14 @@ public class PrintSpoolerParam {
 	public PrintSpoolerParam(PrintSpoolerParamKey key) {
 		super();
 		this.key = key;
+	}
+
+	public PrintSpoolerParam(PrintSpoolerParamKey key, String valoreParam,
+			String paramType) {
+		super();
+		this.key = key;
+		this.valoreParam = valoreParam;
+		this.paramType = paramType;
 	}
 
 	public PrintSpoolerParamKey getKey() {
