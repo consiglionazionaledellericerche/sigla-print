@@ -6,6 +6,7 @@ import it.cnr.si.domain.sigla.PrintSpoolerParam;
 import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
 import it.cnr.si.repository.PrintRepository;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.HashSet;
@@ -25,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class PrintServiceTest {
 
-    public static final String ID = "reports/logs/batchlog.jrxml";
+    public static final String IDREPORT = "/logs/batchlog.jrxml", IDIMAGE = "/img/CNR.JPG";
     @Autowired
     private PrintService printService;
 
@@ -48,20 +49,28 @@ public class PrintServiceTest {
     	printSpooler.setParams(params);
 
     	ByteArrayOutputStream baos = printService.executeReport(printSpooler);
-        assertEquals(919, baos.size());
+        assertEquals(8711, baos.size());
     }
 
 
     @Test
     public void testCache() {
-        printService.jasperReport(ID, null);
-        printService.jasperReport(ID, null);
-        printService.jasperReport(ID, null);
-        printService.evict(ID);
-        printService.jasperReport(ID, null);
-        printService.jasperReport(ID, null);
-        printService.jasperReport(ID, null);
-
+        printService.jasperReport(IDREPORT, null);
+        printService.jasperReport(IDREPORT, null);
+        ByteArrayInputStream bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        assertEquals(4133, bais.available());
+        bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        assertEquals(4133, bais.available());
+        
+        printService.evict(IDREPORT);
+        printService.evict(IDIMAGE);
+        
+        printService.jasperReport(IDREPORT, null);
+        printService.jasperReport(IDREPORT, null);
+        bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        assertEquals(4133, bais.available());
+        bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        assertEquals(4133, bais.available());
     }
 
 }

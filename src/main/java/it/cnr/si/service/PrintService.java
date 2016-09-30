@@ -134,7 +134,7 @@ public class PrintService {
 					}
 					try {
 						File image = File.createTempFile("IMAGE", ".jpg");
-						FileUtils.copyInputStreamToFile(imageReport(s), image);
+						FileUtils.copyInputStreamToFile(new ByteArrayInputStream(imageReport(s)), image);
 						return image;
 					} catch (IOException e) {
 						LOGGER.error("Cannot find image", e);
@@ -156,11 +156,11 @@ public class PrintService {
 	}
 
 	@Cacheable(cacheNames = JASPER_CACHE, key = "#key")
-	public InputStream imageReport(String key) {
+	public byte[] imageReport(String key) {
 		byte[] image = restTemplate.getForObject(gitlabUrl + key + "?private_token={private_token}",
 				byte[].class, gitlabToken);
 		LOGGER.debug(key);
-		return new ByteArrayInputStream(image);
+		return image;
 	}
 
 	@Cacheable(cacheNames = JASPER_CACHE, key = "#key")
