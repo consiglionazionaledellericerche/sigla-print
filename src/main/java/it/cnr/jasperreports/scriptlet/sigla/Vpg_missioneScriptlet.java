@@ -13,6 +13,7 @@ public class Vpg_missioneScriptlet extends SIGLAScriptlet {
 		java.sql.Connection conn = (java.sql.Connection)getParameterValue("REPORT_CONNECTION");
 		java.sql.CallableStatement cs = null; 
 		try{	        	
+			conn.setAutoCommit(false);
 			cs = conn.prepareCall("{call SPG_MISSIONE(?,?,?,?,?,?)}");
 			cs.setObject(1,(java.lang.String)getParameterValue("aCd_cds"));
 			cs.setObject(2,(java.lang.String)getParameterValue("aCd_uo"));

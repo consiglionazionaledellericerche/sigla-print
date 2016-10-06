@@ -1,5 +1,11 @@
 package it.cnr.si.domain.sigla;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -13,9 +19,20 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Entity
 @Table(name="PRINT_SPOOLER")
 public class PrintSpooler {
+	private static final String JRXML = ".jrxml";
+	private static final String JASPER = ".jasper";
+	public static final java.text.DateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy/MM/dd");
+	public static final java.text.DateFormat TIMESTAMP_FORMAT = new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	public static final DateFormat PDF_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final Logger LOGGER = LoggerFactory.getLogger(PrintSpooler.class);
+
 	/**
 	 * PG_STAMPA NUMBER (10) {null} NOT NULL Progressivo della stampa
 	 */
@@ -162,6 +179,21 @@ public class PrintSpooler {
 	@Enumerated(EnumType.STRING)
 	private TipoIntervallo tiIntervallo;
 
+	@Column(name="dacr", nullable=false)
+	private Date dacr;
+
+	@Column(name="utcr", nullable=false)
+	private String utcr;
+
+	@Column(name="duva", nullable=false)
+	private Date duva;
+
+	@Column(name="utuv", nullable=false)
+	private String utuv;
+
+    @Version
+    private Long pg_ver_rec;
+	
 	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumn(name = "PG_STAMPA")	
 	private Set<PrintSpoolerParam> params;
@@ -379,6 +411,43 @@ public class PrintSpooler {
 		this.tiIntervallo = tiIntervallo;
 	}
 
+	
+	public Date getDacr() {
+		return dacr;
+	}
+
+	public void setDacr(Date dacr) {
+		this.dacr = dacr;
+	}
+
+	public String getUtcr() {
+		return utcr;
+	}
+
+	public void setUtcr(String utcr) {
+		this.utcr = utcr;
+	}
+
+	public Date getDuva() {
+		return duva;
+	}
+
+	public void setDuva(Date duva) {
+		this.duva = duva;
+	}
+
+	public String getUtuv() {
+		return utuv;
+	}
+
+	public void setUtuv(String utuv) {
+		this.utuv = utuv;
+	}
+
+	public Long getPg_ver_rec() {
+		return pg_ver_rec;
+	}
+
 	public Set<PrintSpoolerParam> getParams() {
 		return params;
 	}
@@ -387,7 +456,52 @@ public class PrintSpooler {
 		this.params = params;
 	}
 
+	public String getKey() {
+		return getReport().substring(0, getReport().indexOf(JASPER)).concat(JRXML);
+	}	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public HashMap<String, Object> getParameters() {
+		HashMap<String, Object> parameters = new HashMap<String, Object>();
+		for (it.cnr.si.domain.sigla.PrintSpoolerParam printSpoolerParam : getParams()) {
+			Serializable valoreParametro = null;
+			try{
+				Class classe = Class.forName(printSpoolerParam.getParamType());
+				if (classe.equals(java.util.Date.class)){
+					valoreParametro = DATE_FORMAT.parse(printSpoolerParam.getValoreParam());
+				}else if (classe.equals(java.util.Date.class)){
+					valoreParametro = TIMESTAMP_FORMAT.parse(printSpoolerParam.getValoreParam());
+				}else{
+					Constructor costr =  classe.getConstructor(String.class);
+					valoreParametro = (Serializable) costr.newInstance(printSpoolerParam.getValoreParam());
+				}
+			}catch(ClassCastException _ex){
+				valoreParametro = printSpoolerParam.getValoreParam();
+			}catch(Exception _ex){
+				LOGGER.error("Error in parameter conversion", _ex);
+			}
+			parameters.put(printSpoolerParam.getKey().getNomeParam(), valoreParametro);
+		}
+		parameters.put("DIR_IMAGE", "/img/");        
+		parameters.put("DIR_SUBREPORT", getPath());
+		parameters.put("SUBREPORT_DIR", getPath());
+		return parameters;
+	}
+	
+	public String getPath() {
+		return getReport().substring(0, getReport().lastIndexOf("/") + 1);
+	}
+
 	public String getName() {
-		return null;
+    	String fileName = getReport();
+    	fileName = fileName.replace('/', '_');
+    	fileName = fileName.replace('\\', '_');
+    	if(fileName.startsWith("_"))
+    		fileName = fileName.substring(1);
+    	if(fileName.endsWith(JASPER))
+    		fileName = fileName.substring(0, fileName.length() - 7);
+    	fileName = fileName + ".pdf";
+    	fileName = PDF_DATE_FORMAT.format(new java.util.Date()) + '_' + getPgStampa() + '_' + fileName;
+    	return fileName;
 	}
 }

@@ -3,7 +3,6 @@ package it.cnr.si.repository;
 import it.cnr.si.domain.sigla.PrintSpooler;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.LockModeType;
 

@@ -2,12 +2,10 @@ package it.cnr.si.config;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Optional;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -26,8 +24,7 @@ public class DatabaseConfiguration {
         this.dataSource = dataSource; 
     }
 
-    @Bean
-    public Connection connection () throws SQLException {
+    public Connection connection() throws SQLException {
     	Connection conn = dataSource.getConnection();
     	conn.setAutoCommit(autocommit);
         return conn;
