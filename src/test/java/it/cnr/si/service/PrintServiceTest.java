@@ -1,10 +1,15 @@
 package it.cnr.si.service;
 
-import static org.junit.Assert.assertEquals;
 import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.domain.sigla.PrintSpoolerParam;
 import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
 import it.cnr.si.repository.PrintRepository;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,12 +17,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by francesco on 09/09/16.
@@ -41,8 +41,9 @@ public class PrintServiceTest {
 
 	@Value("${print.output.dir}")
 	private String printOutputDir;
-    
-	@Test
+    public static final int EXPECTED = 40_225;
+
+    @Test
     public void print() throws Exception {
     	PrintSpooler printSpooler = new PrintSpooler((long)5760923);
     	printSpooler.setReport("/doccont/doccont/vpg_man_rev_ass.jasper");
@@ -59,7 +60,7 @@ public class PrintServiceTest {
 
     	ByteArrayOutputStream baos = printService.print(
     			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler.getParameters()));
-        assertEquals(8711, baos.size());
+        assertEquals(110_124, baos.size());
     }
 	
     @Test
@@ -71,9 +72,9 @@ public class PrintServiceTest {
     	cacheService.jasperSubReport(IDSUBREPORT);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
-        assertEquals(4133, bais.available());
+        assertEquals(EXPECTED, bais.available());
         bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
-        assertEquals(4133, bais.available());
+        assertEquals(EXPECTED, bais.available());
         
         cacheService.evict(IDREPORT);
         
@@ -86,9 +87,9 @@ public class PrintServiceTest {
 
         cacheService.evict(IDIMAGE);        
         bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
-        assertEquals(4133, bais.available());
+        assertEquals(EXPECTED, bais.available());
         bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
-        assertEquals(4133, bais.available());
+        assertEquals(EXPECTED, bais.available());
     }
 
 }
