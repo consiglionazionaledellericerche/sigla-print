@@ -5,11 +5,19 @@ security.user:
 management.info.git.mode: full
 
 spring.application.name: sigla-print
+spring.mail.host: smtp.amministrazione.cnr.it
+spring.mail.username: amministrazione_sigla
+spring.mail.password: sigla
+spring.mail.from: sigla@cnr.it
 
-scheduler.print: 60000
-
+print:
+  output.dir: ${user.home}/print
+  server.url: http://localhost:8080
+  scheduler: 5000
+  queue.priorita: 1,2,3
+    
 cnr.gitlab:
-  url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/
+  url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/reports
   token: TyB9NvodV1sDyroHF4zQ
 
 logging.level.it.cnr: DEBUG

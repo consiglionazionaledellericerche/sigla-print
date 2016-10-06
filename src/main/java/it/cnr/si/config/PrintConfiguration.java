@@ -1,18 +1,17 @@
 package it.cnr.si.config;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.config.ManagementCenterConfig;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.spring.cache.HazelcastCacheManager;
-import it.cnr.si.service.PrintService;
+import it.cnr.si.service.ExcelService;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import java.util.stream.Stream;
 
 /**
  * Created by francesco on 12/09/16.
@@ -23,43 +22,23 @@ public class PrintConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrintConfiguration.class);
 
-    private PrintService printService;
+    @Autowired
+    private QueueConfiguration queueConfiguration;
 
-    public PrintConfiguration(PrintService printService) {
-        this.printService = printService;
-    }
+    @Autowired
+    private ExcelService excelService;
+    
+    @Value("#{'${print.queue.priorita}'.split(',')}")
+    private List<String> queuePriorita;
 
 
-    @Scheduled(fixedDelayString = "${scheduler.print}")
+    @Scheduled(fixedDelayString = "${print.scheduler}")
     public void printScheduler() {
-
-        LOGGER.warn("recuperare id stampa da coda");
-
-        Stream
-                .of(1L, 100L, 200L, 12345L)
-                .peek(id -> LOGGER.info("print {}", id))
-                .map(path -> printService.jasperReport("???" + path))
-                .forEach(printService::print);
-
+        LOGGER.info("Start scheduler at {}", ZonedDateTime.now());
+//    	for (String priorita : queuePriorita) {
+//    		queueConfiguration.queuePrintApplication(priorita).add(priorita);
+//		}
+        Optional.ofNullable(excelService.print()).map(map -> excelService.executeExcel(map));
+    	
     }
-
-
-    @Bean
-    public Config config() {
-        Config config = new Config();
-        config.setInstanceName("sigla-print-server");
-        ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
-        managementCenterConfig.setEnabled(true);
-        managementCenterConfig.setUrl("http://localhost:8980");
-        config.setManagementCenterConfig(managementCenterConfig);
-        return config;
-    }
-
-    @Bean
-    public CacheManager cacheManager(HazelcastInstance hazelcastInstance) {
-        HazelcastCacheManager cacheManager = new HazelcastCacheManager(hazelcastInstance);
-        return cacheManager;
-    }
-
-
 }
