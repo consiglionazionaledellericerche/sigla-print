@@ -35,9 +35,9 @@ public class PrintConfiguration {
     @Scheduled(fixedDelayString = "${print.scheduler}")
     public void printScheduler() {
         LOGGER.info("Start scheduler at {}", ZonedDateTime.now());
-//    	for (String priorita : queuePriorita) {
-//    		queueConfiguration.queuePrintApplication(priorita).add(priorita);
-//		}
+    	for (String priorita : queuePriorita) {
+    		queueConfiguration.queuePrintApplication(priorita).add(priorita);
+		}
         Optional.ofNullable(excelService.print()).map(map -> excelService.executeExcel(map));
     	
     }
