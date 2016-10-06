@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by francesco on 09/09/16.
@@ -60,7 +61,8 @@ public class PrintServiceTest {
 
     	ByteArrayOutputStream baos = printService.print(
     			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler.getParameters()));
-        assertEquals(110_124, baos.size());
+        assertTrue(baos.size() > 100_000);
+
     }
 	
     @Test
