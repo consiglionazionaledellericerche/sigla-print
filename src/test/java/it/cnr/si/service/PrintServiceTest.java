@@ -15,6 +15,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -26,14 +27,22 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class PrintServiceTest {
 
-    public static final String IDREPORT = "/logs/batchlog.jrxml", IDIMAGE = "/img/CNR.JPG";
+    public static final String IDREPORT = "/logs/batchlog.jrxml", IDSUBREPORT = "/docamm/docamm/vpg_missione_subreport0.jrxml", IDIMAGE = "/img/CNR.JPG";
     @Autowired
     private PrintService printService;
+    @Autowired
+    private CacheService cacheService;
 
     @Autowired
     private PrintRepository printRepository;
 
-    @Test
+    @Value("${file.separator}")
+	private String fileSeparator;
+
+	@Value("${print.output.dir}")
+	private String printOutputDir;
+    
+	@Test
     public void print() throws Exception {
     	PrintSpooler printSpooler = new PrintSpooler((long)5760923);
     	printSpooler.setReport("/doccont/doccont/vpg_man_rev_ass.jasper");
@@ -48,28 +57,37 @@ public class PrintServiceTest {
 
     	printSpooler.setParams(params);
 
-    	ByteArrayOutputStream baos = printService.executeReport(printSpooler);
+    	ByteArrayOutputStream baos = printService.print(
+    			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler.getParameters()));
         assertEquals(8711, baos.size());
     }
-
-
+	
     @Test
     public void testCache() {
-        printService.jasperReport(IDREPORT, null);
-        printService.jasperReport(IDREPORT, null);
-        ByteArrayInputStream bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+    	cacheService.jasperReport(IDREPORT);
+    	cacheService.jasperReport(IDREPORT);
+        
+    	cacheService.jasperSubReport(IDSUBREPORT);
+    	cacheService.jasperSubReport(IDSUBREPORT);
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
         assertEquals(4133, bais.available());
-        bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
         assertEquals(4133, bais.available());
         
-        printService.evict(IDREPORT);
-        printService.evict(IDIMAGE);
+        cacheService.evict(IDREPORT);
         
-        printService.jasperReport(IDREPORT, null);
-        printService.jasperReport(IDREPORT, null);
-        bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        cacheService.jasperReport(IDREPORT);
+        cacheService.jasperReport(IDREPORT);
+
+        cacheService.evict(IDSUBREPORT);        
+        cacheService.jasperSubReport(IDSUBREPORT);
+        cacheService.jasperSubReport(IDSUBREPORT);
+
+        cacheService.evict(IDIMAGE);        
+        bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
         assertEquals(4133, bais.available());
-        bais = new ByteArrayInputStream(printService.imageReport(IDIMAGE));
+        bais = new ByteArrayInputStream(cacheService.imageReport(IDIMAGE));
         assertEquals(4133, bais.available());
     }
 

@@ -1,5 +1,6 @@
 package it.cnr.si.config;
 
+import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class QueueConfiguration implements InitializingBean{
     private static final String SIGLA_PRIORITA = "SIGLA_PRIORITA_";
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueConfiguration.class);    
 
-    @Value("#{'${queue.sigla.priorita}'.split(',')}")
+    @Value("#{'${print.queue.priorita}'.split(',')}")
     private List<String> queuePriorita;
     
     @Autowired
@@ -30,6 +31,9 @@ public class QueueConfiguration implements InitializingBean{
     
     @Autowired
     private PrintService printService;
+
+    @Autowired
+    private CacheService cacheService;
     
     public IQueue<String> queuePrintApplication(String priorita) {
         return hazelcastInstance.getQueue(SIGLA_PRIORITA.concat(priorita));
@@ -41,18 +45,19 @@ public class QueueConfiguration implements InitializingBean{
             @Override
             public void itemAdded(ItemEvent<String> itemEvent) {
             	String priorita = itemEvent.getItem();
-                LOGGER.info("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
+                LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
                 boolean removed = queuePrintApplication(priorita).remove(priorita);
-                LOGGER.info("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
+                LOGGER.debug("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
-                    LOGGER.info("PrintApplicationListener consuming {}", priorita);
-                    Optional.ofNullable(printService.print(Integer.valueOf(priorita))).map(map -> printService.executeReport(map));
-                    LOGGER.info("PrintApplicationListener consumed {}", priorita);
+                    LOGGER.debug("PrintApplicationListener consuming {}", priorita);
+                    Optional.ofNullable(printService.print(Integer.valueOf(priorita))).map(map -> 
+                    	printService.executeReport(printService.jasperPrint(cacheService.jasperReport(map.getKey()), map.getParameters()), map.getPgStampa(), map.getName(), map.getUtcr()));
+                    LOGGER.debug("PrintApplicationListener consumed {}", priorita);
                 }
             }
             @Override
             public void itemRemoved(ItemEvent<String> itemEvent) {
-                LOGGER.info("PrintApplicationListener removed {}", itemEvent.getItem());
+                LOGGER.debug("PrintApplicationListener removed {}", itemEvent.getItem());
             }
         };
         for (String priorita : queuePriorita) {
