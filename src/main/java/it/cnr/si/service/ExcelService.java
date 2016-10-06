@@ -9,7 +9,6 @@ import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -162,7 +162,7 @@ public class ExcelService {
 				}
 			}
 			File output = new File(Arrays.asList(printOutputDir,excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator)));
-			wb.write(new FileOutputStream(output));// assegno lo stream al FileOutputStream
+			wb.write(FileUtils.openOutputStream(output, true));// assegno lo stream al FileOutputStream
 	        if (excelSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
                 data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
