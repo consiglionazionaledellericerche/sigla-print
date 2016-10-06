@@ -1,6 +1,4 @@
-security.user:
-  name: foo
-  password: bar
+security.basic.enabled: false
 
 management.info.git.mode: full
 
