@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,15 +89,15 @@ public class PrintResource {
 
     }
 
-    @GetMapping("/api/v1/get/excel/{user}/{name:.+}")
-    public ResponseEntity<byte[]> getxls(@PathVariable String user, @PathVariable String name) {
-        LOGGER.info("get report from user: {} and name: {}", user, name);
+    @GetMapping("/api/v1/get/excel/{name:.+}")
+    public ResponseEntity<byte[]> getxls(@RequestAttribute String user, @RequestAttribute String file, @PathVariable String name) {
+        LOGGER.info("get report from user: {} and name: {}", user, file);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/xls"));
         headers.add("content-disposition", "inline;filename=" +
                 name);
-        String path = Arrays.asList(printOutputDir, user, name).stream().collect(Collectors.joining(fileSeparator));
+        String path = Arrays.asList(printOutputDir, user, file).stream().collect(Collectors.joining(fileSeparator));
         try {
 			return new ResponseEntity<>(IOUtils.toByteArray(new FileInputStream(new File(path))),
 			        headers, HttpStatus.OK);
