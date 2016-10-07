@@ -226,7 +226,7 @@ public class PrintService {
             		LOGGER.error("Error while sending email for report pgStampa: {}", pgStampa, ex);
             	}
             }			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOGGER.error("Error executing report pgStampa: {}", pgStampa, e);
 			PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
 			printSpooler.setStato(PrintState.E);
