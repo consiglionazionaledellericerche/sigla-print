@@ -12,7 +12,7 @@ print:
   output.dir: ${user.home}/print
   server.url: http://localhost:8080
   scheduler: 5000
-  queue.priorita: 1,2,3,9
+  queue.priorita: 1,2,3
     
 cnr.gitlab:
   url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/reports
