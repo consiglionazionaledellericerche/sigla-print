@@ -54,7 +54,7 @@ public class PrintResource {
     @Value("${file.separator}")
 	private String fileSeparator;
 
-    @PostMapping("/api/v1/print")
+    @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
         LOGGER.info("print request: {}", printSpooler);
 
