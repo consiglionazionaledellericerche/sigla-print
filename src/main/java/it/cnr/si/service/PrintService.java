@@ -227,7 +227,7 @@ public class PrintService {
             	}
             }			
 		} catch (Exception e) {
-			LOGGER.error("Error executing report pgStampa: {}", pgStampa, e);
+			LOGGER.error("Error executing report with pgStampa: {}", pgStampa, e);
 			PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
 			printSpooler.setStato(PrintState.E);
 			printSpooler.setErrore(e.getMessage());
