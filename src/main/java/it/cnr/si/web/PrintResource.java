@@ -100,7 +100,7 @@ public class PrintResource {
     }
     
     @GetMapping("/api/v1/get/excel/{name:.+}")
-    public ResponseEntity<byte[]> getxls(@RequestParam String user, @RequestParam String file, @RequestParam String command, @PathVariable String name) {
+    public ResponseEntity<byte[]> getxls(@RequestParam String user, @RequestParam String file, @RequestParam(required=false) String command, @PathVariable String name) {
         LOGGER.info("get report from user: {} and name: {}", user, file);
 
         HttpHeaders headers = new HttpHeaders();
