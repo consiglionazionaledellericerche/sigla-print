@@ -34,7 +34,7 @@ public class PrintConfiguration {
 
     @Scheduled(fixedDelayString = "${print.scheduler}")
     public void printScheduler() {
-        LOGGER.info("Start scheduler at {}", ZonedDateTime.now());
+        LOGGER.trace("Start scheduler at {}", ZonedDateTime.now());
     	for (String priorita : queuePriorita) {
     		queueConfiguration.queuePrintApplication(priorita).add(priorita);
 		}
