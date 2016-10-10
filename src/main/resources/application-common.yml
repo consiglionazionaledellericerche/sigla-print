@@ -13,7 +13,7 @@ print:
   server.url: http://localhost:8080
   scheduler: 5000
   deletecron: 0 0 2 1/1 * ?
-  queue.priorita: 1,2,3,9
+  queue.priorita: 1,2,3
     
 cnr.gitlab:
   url: http://git.si.cnr.it/dev/sigla-reports/raw/master
