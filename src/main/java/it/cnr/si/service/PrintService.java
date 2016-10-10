@@ -236,6 +236,7 @@ public class PrintService {
 		return pgStampa;
 	}
 	
+	@Transactional(propagation=Propagation.REQUIRES_NEW)	
 	public void deleteReport(Long pgStampa) {
 		LOGGER.info("Try to delete report pgStampa: {}", pgStampa);
 		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
@@ -244,7 +245,6 @@ public class PrintService {
 		printRepository.delete(printSpooler);
 	}
 	
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public void deleteReport() {
     	Iterable<Long> findReporsToDelete = printRepository.findReportsToDelete();
     	for (Long pgStampa : findReporsToDelete) {

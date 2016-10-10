@@ -33,6 +33,9 @@ public class PrintServiceTest {
     @Autowired
     private PrintService printService;
     @Autowired
+    private ExcelService excelService;
+
+    @Autowired
     private CacheService cacheService;
 
     @Autowired
@@ -45,7 +48,7 @@ public class PrintServiceTest {
 	private String printOutputDir;
     public static final int EXPECTED = 40_225;
 
-    @Test
+    //@Test
     public void print() throws Exception {
     	PrintSpooler printSpooler = new PrintSpooler((long)5760923);
     	printSpooler.setReport("/doccont/doccont/vpg_man_rev_ass.jasper");
@@ -69,9 +72,10 @@ public class PrintServiceTest {
     @Test
     public void deleteReport() {
 		printService.deleteReport();
+		excelService.deleteXls();
     }
     
-    @Test
+    //@Test
     public void testCache() {
     	cacheService.jasperReport(IDREPORT);
     	cacheService.jasperReport(IDREPORT);

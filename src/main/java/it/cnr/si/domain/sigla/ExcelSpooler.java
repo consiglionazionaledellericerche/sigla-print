@@ -5,13 +5,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -101,7 +101,8 @@ public class ExcelSpooler implements Serializable {
 
 	//bi-directional many-to-one association to ExcelSpoolerParam
 	@OrderBy("PG_COLUMN")
-	@OneToMany(mappedBy="excelSpooler", fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="excelSpooler", fetch=FetchType.EAGER)
+	@JoinColumn(name = "PG_ESTRAZIONE", updatable=false)
 	private List<ExcelSpoolerParam> excelSpoolerParams;
 
 	public ExcelSpooler() {
