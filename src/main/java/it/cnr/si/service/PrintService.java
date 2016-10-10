@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -133,11 +134,7 @@ public class PrintService {
 			});        	
 			return JasperFillManager.getInstance(ctx).fill(jasperReport,
 					printSpooler.getParameters(), conn);
-		} catch (JRException | SQLException e) {
-			LOGGER.error("Error executing report with pgStampa: {}", printSpooler.getPgStampa(), e);
-			printSpooler.setStato(PrintState.E);
-			printSpooler.setErrore(e.getMessage());
-			printRepository.save(printSpooler);			
+		} catch (JRRuntimeException | SQLException | JRException e) {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
 			try {
@@ -175,7 +172,15 @@ public class PrintService {
 		}
 		return null;
 	}
-
+	
+	@Transactional(propagation=Propagation.REQUIRES_NEW)	
+	public void error(PrintSpooler printSpooler, Exception _ex) {
+		LOGGER.error("Error executing report with pgStampa: {}", printSpooler.getPgStampa(), _ex);
+		printSpooler.setStato(PrintState.E);
+		printSpooler.setErrore(_ex.getCause().getMessage());
+		printRepository.save(printSpooler);			
+	}
+	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)	
 	public Long executeReport(JasperPrint jasperPrint, Long pgStampa, String name, String userName) {
 		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
@@ -230,11 +235,7 @@ public class PrintService {
             	}
             }			
 		} catch (Exception e) {
-			LOGGER.error("Error executing report with pgStampa: {}", pgStampa, e);
-			PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
-			printSpooler.setStato(PrintState.E);
-			printSpooler.setErrore(e.getMessage());
-			printRepository.save(printSpooler);			
+			error(printRepository.findOne(pgStampa), e);
 		}
 		return pgStampa;
 	}

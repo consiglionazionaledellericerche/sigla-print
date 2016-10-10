@@ -1,10 +1,12 @@
 package it.cnr.si.config;
 
+import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
 
 import java.util.List;
-import java.util.Optional;
+
+import net.sf.jasperreports.engine.JasperPrint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +52,17 @@ public class QueueConfiguration implements InitializingBean{
                 LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
                     LOGGER.trace("PrintApplicationListener consuming {}", priorita);
-                    Optional.ofNullable(printService.print(Integer.valueOf(priorita))).map(map -> 
-                    	printService.executeReport(printService.jasperPrint(cacheService.jasperReport(map.getKey()), map), 
-                    			map.getPgStampa(), map.getName(), map.getUtcr()));
+                    PrintSpooler print = printService.print(Integer.valueOf(priorita));
+                    if (print != null) {
+                    	try {
+                        	JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
+                        	printService.executeReport(jasperPrint, print.getPgStampa(), 
+                        			print.getName(), 
+                        			print.getUtcr());                    		
+                    	} catch (Exception _ex) {
+                    		printService.error(print, _ex);
+                    	}
+                    }
                     LOGGER.trace("PrintApplicationListener consumed {}", priorita);
                 }
             }
