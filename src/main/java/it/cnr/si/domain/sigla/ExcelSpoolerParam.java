@@ -53,7 +53,7 @@ public class ExcelSpoolerParam implements Serializable {
 	private ExcelSpooler excelSpooler;
 
 	//bi-directional many-to-one association to ExcelSpoolerParamColumn
-	@OneToMany(mappedBy="excelSpoolerParam", fetch=FetchType.EAGER)
+	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumns({
 		@JoinColumn(name = "PG_ESTRAZIONE", updatable=false),
 		@JoinColumn(name = "PG_COLUMN", updatable=false)		
