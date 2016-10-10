@@ -101,7 +101,7 @@ public class ExcelSpooler implements Serializable {
 
 	//bi-directional many-to-one association to ExcelSpoolerParam
 	@OrderBy("PG_COLUMN")
-	@OneToMany(mappedBy="excelSpooler", fetch=FetchType.EAGER)
+	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumn(name = "PG_ESTRAZIONE", updatable=false)
 	private List<ExcelSpoolerParam> excelSpoolerParams;
 
