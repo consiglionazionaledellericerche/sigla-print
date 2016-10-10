@@ -3,7 +3,11 @@ package it.cnr.si.web;
 import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.domain.sigla.PrintSpoolerParam;
 import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
+import it.cnr.si.dto.Commit;
+import it.cnr.si.dto.HookRequest;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +29,7 @@ public class PrintResourceTest {
     @Autowired
     private PrintResource printResource;
 
-    @Test
+    //@Test
     public void testPrint() throws Exception {
     	PrintSpooler printSpooler = new PrintSpooler((long)5760923);
     	printSpooler.setReport("/doccont/doccont/vpg_man_rev_ass.jasper");
@@ -43,4 +47,15 @@ public class PrintResourceTest {
 
     }
 
+    @Test
+    public void testCache() throws Exception {
+    	HookRequest hookRequest = new HookRequest();
+    	hookRequest.setUser_name("mario.rossi");
+    	Commit commit = new Commit();
+    	commit.setAdded(Collections.emptyList());
+    	commit.setRemoved(Collections.emptyList());    	
+    	commit.setModified(Arrays.asList("docamm/docamm/vpg_missione_subreport0.jrxml", "doccont/doccont/vpg_man_rev_ass.jrxml"));
+    	hookRequest.setCommits(Collections.singletonList(commit));
+		printResource.hook(hookRequest);
+    }    
 }
