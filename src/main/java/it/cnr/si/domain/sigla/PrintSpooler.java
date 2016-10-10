@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -194,7 +195,7 @@ public class PrintSpooler {
     @Version
     private Long pg_ver_rec;
 	
-	@OneToMany(fetch=FetchType.EAGER)
+	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
 	@JoinColumn(name = "PG_STAMPA")	
 	private Set<PrintSpoolerParam> params;
 

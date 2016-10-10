@@ -1,7 +1,9 @@
 package it.cnr.si.domain.sigla;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +53,7 @@ public class ExcelSpoolerParam implements Serializable {
 	private ExcelSpooler excelSpooler;
 
 	//bi-directional many-to-one association to ExcelSpoolerParamColumn
-	@OneToMany(mappedBy="excelSpoolerParam", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="excelSpoolerParam", fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
 	private List<ExcelSpoolerParamColumn> excelSpoolerParamColumns;
 
 	public ExcelSpoolerParam() {
