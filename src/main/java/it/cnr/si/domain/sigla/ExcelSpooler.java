@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -100,7 +101,7 @@ public class ExcelSpooler implements Serializable {
 
 	//bi-directional many-to-one association to ExcelSpoolerParam
 	@OrderBy("PG_COLUMN")
-	@OneToMany(mappedBy="excelSpooler", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="excelSpooler", fetch=FetchType.EAGER, cascade=CascadeType.REMOVE)
 	private List<ExcelSpoolerParam> excelSpoolerParams;
 
 	public ExcelSpooler() {
