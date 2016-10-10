@@ -235,4 +235,20 @@ public class PrintService {
 		}
 		return pgStampa;
 	}
+	
+	public void deleteReport(Long pgStampa) {
+		LOGGER.info("Try to delete report pgStampa: {}", pgStampa);
+		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
+        String path = Arrays.asList(printOutputDir, printSpooler.getUtcr(), printSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+        new File(path).delete();		
+		printRepository.delete(printSpooler);
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	public void deleteReport() {
+    	Iterable<Long> findReporsToDelete = printRepository.findReportsToDelete();
+    	for (Long pgStampa : findReporsToDelete) {
+    		deleteReport(pgStampa);
+		}		
+	}
 }

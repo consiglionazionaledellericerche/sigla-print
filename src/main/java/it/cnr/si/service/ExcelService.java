@@ -265,5 +265,20 @@ public class ExcelService {
 		} 
 		return rownum;   	
     }
+	
+	public void deleteXls(Long pgEstrazione) {
+		LOGGER.info("Try to delete excel pgEstrazione: {}", pgEstrazione);
+		ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
+        String path = Arrays.asList(printOutputDir, excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+        new File(path).delete();		
+        excelRepository.delete(excelSpooler);
+	}
 
+	@Transactional(propagation=Propagation.REQUIRES_NEW)	
+	public void deleteXls() {
+    	Iterable<Long> findXlsToDelete = excelRepository.findXlsToDelete();
+    	for (Long pgEstrazione : findXlsToDelete) {
+    		deleteXls(pgEstrazione);
+		}		
+	}
 }

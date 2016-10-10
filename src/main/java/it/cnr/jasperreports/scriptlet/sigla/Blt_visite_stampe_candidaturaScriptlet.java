@@ -4,11 +4,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import it.cnr.jasperreports.scriptlet.SIGLAScriptlet;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
 import net.sf.jasperreports.engine.JRScriptletException;
 
 
-public class Blt_visite_stampe_candidaturaScriptlet extends SIGLAScriptlet {
+public class Blt_visite_stampe_candidaturaScriptlet extends JRDefaultScriptlet {
 	static final long ONE_HOUR = 60 * 60 * 1000L;
     
 	/** Creates a new instance of JRIreportDefaultScriptlet */

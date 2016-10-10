@@ -24,4 +24,7 @@ public interface PrintRepository extends CrudRepository<PrintSpooler, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from PrintSpooler p where p.pgStampa = :pgStampa")
 	PrintSpooler findOneForUpdate(@Param("pgStampa") Long pgStampa);
+
+    @Query("select p.pgStampa from PrintSpooler p, ParametriEnte e  where e.attivo = 'Y' and p.stato = 'S' and p.dtProssimaEsecuzione is null AND TRUNC(SYSDATE - p.duva) > Nvl(e.cancellaStampe,30)")
+	Iterable<Long> findReportsToDelete();
 }

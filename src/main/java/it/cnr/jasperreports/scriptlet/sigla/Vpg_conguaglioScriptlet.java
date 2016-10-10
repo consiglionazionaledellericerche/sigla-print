@@ -1,9 +1,9 @@
 package it.cnr.jasperreports.scriptlet.sigla;
-import it.cnr.jasperreports.scriptlet.SIGLAScriptlet;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
+import net.sf.jasperreports.engine.JRScriptletException;
 
 
-public class Vpg_conguaglioScriptlet extends SIGLAScriptlet {
+public class Vpg_conguaglioScriptlet extends JRDefaultScriptlet {
 	    
 	/** Creates a new instance of JRIreportDefaultScriptlet */
 	public Vpg_conguaglioScriptlet() {
