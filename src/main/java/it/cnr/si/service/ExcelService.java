@@ -266,6 +266,7 @@ public class ExcelService {
 		return rownum;   	
     }
 	
+	@Transactional(propagation=Propagation.REQUIRES_NEW)	
 	public void deleteXls(Long pgEstrazione) {
 		LOGGER.info("Try to delete excel pgEstrazione: {}", pgEstrazione);
 		ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
@@ -273,8 +274,7 @@ public class ExcelService {
         new File(path).delete();		
         excelRepository.delete(excelSpooler);
 	}
-
-	@Transactional(propagation=Propagation.REQUIRES_NEW)	
+	
 	public void deleteXls() {
     	Iterable<Long> findXlsToDelete = excelRepository.findXlsToDelete();
     	for (Long pgEstrazione : findXlsToDelete) {

@@ -5,6 +5,9 @@ spring.jpa:
     hibernate.connection.autocommit: false
 #  database-platform: org.hibernate.dialect.Oracle10gDialect
 
+print:
+  scheduler: 500000
+
 spring.datasource:
   url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
   username: PCIR009
