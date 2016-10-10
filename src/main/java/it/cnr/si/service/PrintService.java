@@ -149,7 +149,7 @@ public class PrintService {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
-		LOGGER.debug("InitDate " + cal.getTime());
+		LOGGER.trace("InitDate " + cal.getTime());
 		return cal.getTime();
 	}
 
@@ -157,7 +157,7 @@ public class PrintService {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.SECOND, 59);
-		LOGGER.debug("FinalDate " + cal.getTime());
+		LOGGER.trace("FinalDate " + cal.getTime());
 		return cal.getTime();
 	}
 	

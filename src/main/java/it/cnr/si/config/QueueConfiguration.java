@@ -45,19 +45,19 @@ public class QueueConfiguration implements InitializingBean{
             @Override
             public void itemAdded(ItemEvent<String> itemEvent) {
             	String priorita = itemEvent.getItem();
-                LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
+                LOGGER.trace("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
                 boolean removed = queuePrintApplication(priorita).remove(priorita);
-                LOGGER.debug("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
+                LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
-                    LOGGER.debug("PrintApplicationListener consuming {}", priorita);
+                    LOGGER.trace("PrintApplicationListener consuming {}", priorita);
                     Optional.ofNullable(printService.print(Integer.valueOf(priorita))).map(map -> 
                     	printService.executeReport(printService.jasperPrint(cacheService.jasperReport(map.getKey()), map.getParameters()), map.getPgStampa(), map.getName(), map.getUtcr()));
-                    LOGGER.debug("PrintApplicationListener consumed {}", priorita);
+                    LOGGER.trace("PrintApplicationListener consumed {}", priorita);
                 }
             }
             @Override
             public void itemRemoved(ItemEvent<String> itemEvent) {
-                LOGGER.debug("PrintApplicationListener removed {}", itemEvent.getItem());
+                LOGGER.trace("PrintApplicationListener removed {}", itemEvent.getItem());
             }
         };
         for (String priorita : queuePriorita) {
