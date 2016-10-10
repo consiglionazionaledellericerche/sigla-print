@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
@@ -108,7 +107,7 @@ public class PrintService {
 	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=true)
-	public JasperPrint jasperPrint(JasperReport jasperReport, Map<String, Object> parameters)  {
+	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler)  {
 		LOGGER.info("jasperReport = {}", jasperReport);
 		Connection conn = null;
 		try {
@@ -133,8 +132,12 @@ public class PrintService {
 				}
 			});        	
 			return JasperFillManager.getInstance(ctx).fill(jasperReport,
-					parameters, conn);
+					printSpooler.getParameters(), conn);
 		} catch (JRException | SQLException e) {
+			LOGGER.error("Error executing report with pgStampa: {}", printSpooler.getPgStampa(), e);
+			printSpooler.setStato(PrintState.E);
+			printSpooler.setErrore(e.getMessage());
+			printRepository.save(printSpooler);			
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
 			try {
