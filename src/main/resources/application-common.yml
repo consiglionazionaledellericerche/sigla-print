@@ -16,7 +16,7 @@ print:
   queue.priorita: 1,2,3
     
 cnr.gitlab:
-  url: http://git.si.cnr.it/dev/sigla-common/raw/master/SIGLAReports/reports
+  url: http://git.si.cnr.it/dev/sigla-reports/raw/master
   token: TyB9NvodV1sDyroHF4zQ
 
 logging.level.it.cnr: DEBUG
