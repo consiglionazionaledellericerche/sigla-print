@@ -64,7 +64,7 @@ public class PrintServiceTest {
     	printSpooler.setParams(params);
 
     	ByteArrayOutputStream baos = printService.print(
-    			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler.getParameters()));
+    			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler));
         assertTrue(baos.size() > 100_000);
 
     }

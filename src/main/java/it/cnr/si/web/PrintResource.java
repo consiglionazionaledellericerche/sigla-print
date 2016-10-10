@@ -64,7 +64,7 @@ public class PrintResource {
         headers.add("content-disposition", "inline;filename=" +
                 fileName);
         ByteArrayOutputStream outputStream = printService.print(
-        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler.getParameters()));
+        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler));
 
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);

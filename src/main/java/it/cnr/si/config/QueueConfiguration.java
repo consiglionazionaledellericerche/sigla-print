@@ -51,7 +51,8 @@ public class QueueConfiguration implements InitializingBean{
                 if (removed) {
                     LOGGER.trace("PrintApplicationListener consuming {}", priorita);
                     Optional.ofNullable(printService.print(Integer.valueOf(priorita))).map(map -> 
-                    	printService.executeReport(printService.jasperPrint(cacheService.jasperReport(map.getKey()), map.getParameters()), map.getPgStampa(), map.getName(), map.getUtcr()));
+                    	printService.executeReport(printService.jasperPrint(cacheService.jasperReport(map.getKey()), map), 
+                    			map.getPgStampa(), map.getName(), map.getUtcr()));
                     LOGGER.trace("PrintApplicationListener consumed {}", priorita);
                 }
             }
