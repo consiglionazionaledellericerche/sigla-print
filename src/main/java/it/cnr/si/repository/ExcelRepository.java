@@ -24,4 +24,7 @@ public interface ExcelRepository extends CrudRepository<ExcelSpooler, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from ExcelSpooler p where p.pgEstrazione = :pgEstrazione")
 	ExcelSpooler findOneForUpdate(@Param("pgEstrazione") Long pgEstrazione);
+	
+    @Query("select p.pgEstrazione from ExcelSpooler p, ParametriEnte e  where e.attivo = 'Y' and p.stato = 'S' and p.dtProssimaEsecuzione is null AND TRUNC(SYSDATE - p.duva) > Nvl(e.cancellaStampe,30)")
+	Iterable<Long> findXlsToDelete();	
 }

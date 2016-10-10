@@ -1,8 +1,8 @@
 package it.cnr.jasperreports.scriptlet.sigla;
-import it.cnr.jasperreports.scriptlet.SIGLAScriptlet;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
+import net.sf.jasperreports.engine.JRScriptletException;
 
-public class Anagrafica_progettiScriptlet extends SIGLAScriptlet{
+public class Anagrafica_progettiScriptlet extends JRDefaultScriptlet{
     
 	/** Creates a new instance of JRIreportDefaultScriptlet */
 	public Anagrafica_progettiScriptlet() {	

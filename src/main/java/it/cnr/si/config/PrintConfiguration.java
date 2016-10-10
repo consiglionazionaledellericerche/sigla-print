@@ -1,6 +1,7 @@
 package it.cnr.si.config;
 
 import it.cnr.si.service.ExcelService;
+import it.cnr.si.service.PrintService;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -27,6 +28,9 @@ public class PrintConfiguration {
 
     @Autowired
     private ExcelService excelService;
+
+    @Autowired
+    private PrintService printService;
     
     @Value("#{'${print.queue.priorita}'.split(',')}")
     private List<String> queuePriorita;
@@ -38,7 +42,12 @@ public class PrintConfiguration {
     	for (String priorita : queuePriorita) {
     		queueConfiguration.queuePrintApplication(priorita).add(priorita);
 		}
-        Optional.ofNullable(excelService.print()).map(map -> excelService.executeExcel(map));
-    	
+        Optional.ofNullable(excelService.print()).map(map -> excelService.executeExcel(map));    	
+    }
+    
+    @Scheduled(cron = "${print.deletecron}")
+    public void delete() {
+    	printService.deleteReport();
+    	excelService.deleteXls();
     }
 }

@@ -1,9 +1,9 @@
 package it.cnr.jasperreports.scriptlet.sigla;
-import it.cnr.jasperreports.scriptlet.SIGLAScriptlet;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
+import net.sf.jasperreports.engine.JRScriptletException;
 
 
-public class Preventivo_finanziario_decisionale_Parte_EntrateScriptlet extends SIGLAScriptlet {
+public class Preventivo_finanziario_decisionale_Parte_EntrateScriptlet extends JRDefaultScriptlet {
     
 	/** Creates a new instance of JRIreportDefaultScriptlet */
 	public Preventivo_finanziario_decisionale_Parte_EntrateScriptlet() {		

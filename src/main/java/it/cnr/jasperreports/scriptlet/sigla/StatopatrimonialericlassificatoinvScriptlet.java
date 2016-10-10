@@ -1,9 +1,10 @@
 package it.cnr.jasperreports.scriptlet.sigla;
-import it.cnr.jasperreports.scriptlet.SIGLAScriptlet;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRScriptletException;
 
 
-public class StatopatrimonialericlassificatoinvScriptlet extends SIGLAScriptlet {
+public class StatopatrimonialericlassificatoinvScriptlet extends JRDefaultScriptlet {
 	private java.lang.String id_report;    
 	/** Creates a new instance of JRIreportDefaultScriptlet */
 	public StatopatrimonialericlassificatoinvScriptlet() {

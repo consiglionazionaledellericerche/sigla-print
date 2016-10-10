@@ -4,6 +4,7 @@ import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.domain.sigla.PrintSpoolerParam;
 import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
 import it.cnr.si.repository.PrintRepository;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,11 @@ public class PrintServiceTest {
 
     }
 	
+    @Test
+    public void deleteReport() {
+		printService.deleteReport();
+    }
+    
     @Test
     public void testCache() {
     	cacheService.jasperReport(IDREPORT);

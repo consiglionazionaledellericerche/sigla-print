@@ -1,9 +1,10 @@
 package it.cnr.jasperreports.scriptlet.sigla;
-import it.cnr.jasperreports.scriptlet.SIGLAScriptlet;
-import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.JRDefaultScriptlet;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRScriptletException;
 
 
-public class Registro_inventarioScriptlet extends SIGLAScriptlet {
+public class Registro_inventarioScriptlet extends JRDefaultScriptlet {
     
 	/** Creates a new instance of JRIreportDefaultScriptlet */
 	public Registro_inventarioScriptlet() {
