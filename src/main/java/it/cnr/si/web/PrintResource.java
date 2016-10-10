@@ -137,6 +137,7 @@ public class PrintResource {
                 .distinct()
                 .sorted()
                 .peek(LOGGER::info)
+                .map(map -> fileSeparator.concat(map))
                 .forEach(cacheService::evict);
 
         return ResponseEntity.ok("done");
