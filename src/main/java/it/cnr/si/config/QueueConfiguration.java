@@ -47,7 +47,7 @@ public class QueueConfiguration implements InitializingBean{
             @Override
             public void itemAdded(ItemEvent<String> itemEvent) {
             	String priorita = itemEvent.getItem();
-                LOGGER.trace("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
+                LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
                 boolean removed = queuePrintApplication(priorita).remove(priorita);
                 LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
