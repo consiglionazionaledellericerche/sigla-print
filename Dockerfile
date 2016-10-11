@@ -2,7 +2,7 @@
 FROM anapsix/alpine-java:jdk8
 MAINTAINER Francesco Uliana <francesco.uliana@cnr.it>
 
-COPY target/*SNAPSHOT.war /opt/sigla-print.war
+COPY target/*.war /opt/sigla-print.war
 
 EXPOSE 8080
 
