@@ -102,14 +102,14 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>3.0-FINAL</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. Remove when the m2e 
+				<!-- This plugin's configuration is used to store Eclipse m2e settings
+					only. It has no influence on the Maven build itself. Remove when the m2e
 					plugin can correctly bind to Maven lifecycle -->
 
 				<plugin>
@@ -168,5 +168,10 @@
 		</plugins>
 	</build>
 
+  <scm>
+    <connection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</connection>
+    <developerConnection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
 </project>
