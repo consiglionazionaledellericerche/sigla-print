@@ -29,5 +29,4 @@ public class DatabaseConfiguration {
     	conn.setAutoCommit(autocommit);
         return conn;
     }
-
 }
