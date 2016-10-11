@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -144,29 +145,16 @@ public class PrintService {
 			}
 		}
 	}
-
-	private Date getInitDate(){
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		LOGGER.trace("InitDate " + cal.getTime());
-		return cal.getTime();
-	}
-
-	private Date getFinalDate(){
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MINUTE, 59);
-		cal.set(Calendar.SECOND, 59);
-		LOGGER.trace("FinalDate " + cal.getTime());
-		return cal.getTime();
-	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public PrintSpooler print(Integer priorita) {
-		Long pgStampa = printRepository.findReportToExecute(priorita, getInitDate(), getFinalDate());    
+		Long pgStampa = printRepository.findReportToExecute(priorita, 
+				Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
+				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
 		if (pgStampa != null) {
 			PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
 			printSpooler.setStato(PrintState.X);
+			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 			printRepository.save(printSpooler);
 			return printSpooler;
 		}
@@ -177,6 +165,7 @@ public class PrintService {
 	public void error(PrintSpooler printSpooler, Exception _ex) {
 		LOGGER.error("Error executing report with pgStampa: {}", printSpooler.getPgStampa(), _ex);
 		printSpooler.setStato(PrintState.E);
+		printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 		printSpooler.setErrore(_ex.getCause().getMessage());
 		printRepository.save(printSpooler);			
 	}
@@ -203,6 +192,7 @@ public class PrintService {
 	        }			
 			printSpooler.setStato(PrintState.S);
 			printSpooler.setServer(serverURL.concat("/api/v1/get/print"));
+			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 			printSpooler.setNomeFile(name);
 			printRepository.save(printSpooler);
             if (printSpooler.getFlEmail()){

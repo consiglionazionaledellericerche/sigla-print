@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -59,27 +60,14 @@ public class ExcelService {
 	@Autowired
 	private MailService mailService;
 	
-	private Date getInitDate(){
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		LOGGER.trace("InitDate " + cal.getTime());
-		return cal.getTime();
-	}
-
-	private Date getFinalDate(){
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MINUTE, 59);
-		cal.set(Calendar.SECOND, 59);
-		LOGGER.trace("FinalDate " + cal.getTime());
-		return cal.getTime();
-	}	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public ExcelSpooler print() {
-		Long pgEstrazione = excelRepository.findExcelToExecute(getInitDate(), getFinalDate());    
+		Long pgEstrazione = excelRepository.findExcelToExecute(Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
+				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
 		if (pgEstrazione != null) {
 			ExcelSpooler excelSpooler = excelRepository.findOneForUpdate(pgEstrazione);
 			excelSpooler.setStato(PrintState.X.name());
+			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 			excelRepository.save(excelSpooler);
 			return excelSpooler;
 		}
@@ -179,6 +167,7 @@ public class ExcelService {
 			excelSpooler.setStato(PrintState.S.name());
 			excelSpooler.setServer(serverURL.concat("/api/v1/get/excel"));
 			excelSpooler.setNomeFile(excelSpooler.getName());
+			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 			excelRepository.save(excelSpooler);
             if (excelSpooler.getFlEmail()){
             	try {
@@ -212,6 +201,7 @@ public class ExcelService {
 		} catch (SQLException | IOException e) {
 			LOGGER.error("Error executing report pgStampa: {}", excelSpooler.getPgEstrazione(), e);
 			excelSpooler.setStato(PrintState.E.name());
+			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 			excelSpooler.setErrore(e.getMessage());
 			excelRepository.save(excelSpooler);			
 		}finally {
