@@ -2,9 +2,7 @@ package it.cnr.si.service;
 
 import it.cnr.si.exception.JasperRuntimeException;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
@@ -47,18 +45,17 @@ public class CacheService {
 	}
 
 	@Cacheable(cacheNames = JASPER_CACHE, key = "#key")
-	public String jasperSubReport(String key) {
+	public byte[] jasperSubReport(String key) {
 		String jrXml = restTemplate.getForObject(gitlabUrl + key + "?private_token={private_token}",
 				String.class, gitlabToken);
 		LOGGER.debug(jrXml);
 		LOGGER.info("creating jasper report: {}", key);
 		try {
-			File subReportFile = File.createTempFile("SUBREPORT", ".jasper");
-			FileOutputStream fileOutputStream = new FileOutputStream(subReportFile);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			InputStream inputStream = IOUtils.toInputStream(jrXml, Charset.defaultCharset());
-			JasperCompileManager.compileReportToStream(inputStream, fileOutputStream);
-			return subReportFile.getPath();
-		} catch (JRException| IOException e) {
+			JasperCompileManager.compileReportToStream(inputStream, baos);
+			return baos.toByteArray();
+		} catch (JRException e) {
 			throw new JasperRuntimeException("unable to compile report id " + key, e);
 		}
 	}

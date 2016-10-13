@@ -106,8 +106,14 @@ public class PrintService {
 			ctx.setClassLoader(getClass().getClassLoader());
 			ctx.setFileResolver(fileName -> {
                 if (fileName.endsWith(".jasper")) {
-                    String key = fileName.substring(0, fileName.indexOf(".jasper")).concat(".jrxml");
-                    return new File(cacheService.jasperSubReport(key));
+                	try {
+	                	File subreport = File.createTempFile("SUBREPORT", ".jasper");
+	                    String key = fileName.substring(0, fileName.indexOf(".jasper")).concat(".jrxml");
+	                    FileUtils.copyInputStreamToFile(new ByteArrayInputStream(cacheService.jasperSubReport(key)), subreport);
+	                    return subreport;
+                    } catch (IOException e) {
+                        LOGGER.error("Cannot find subreport", e);
+                    }
                 }
                 try {
                     File image = File.createTempFile("IMAGE", ".jpg");
