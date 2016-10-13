@@ -1,15 +1,9 @@
 package it.cnr.si.service;
 
 import it.cnr.si.exception.JasperRuntimeException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
-
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +12,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 @Service
 public class CacheService {
@@ -45,7 +43,7 @@ public class CacheService {
 	}
 
 	@Cacheable(cacheNames = JASPER_CACHE, key = "#key")
-	public byte[] jasperSubReport(String key) {
+	public JasperReport jasperSubReport(String key) {
 		String jrXml = restTemplate.getForObject(gitlabUrl + key + "?private_token={private_token}",
 				String.class, gitlabToken);
 		LOGGER.debug(jrXml);
@@ -53,8 +51,7 @@ public class CacheService {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			InputStream inputStream = IOUtils.toInputStream(jrXml, Charset.defaultCharset());
-			JasperCompileManager.compileReportToStream(inputStream, baos);
-			return baos.toByteArray();
+			return JasperCompileManager.compileReport(inputStream);
 		} catch (JRException e) {
 			throw new JasperRuntimeException("unable to compile report id " + key, e);
 		}

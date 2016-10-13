@@ -8,12 +8,16 @@ import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.util.LocalJasperReportsContext;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.repo.InputStreamResource;
+import net.sf.jasperreports.repo.ReportResource;
+import net.sf.jasperreports.repo.RepositoryService;
+import net.sf.jasperreports.repo.Resource;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -102,31 +106,14 @@ public class PrintService {
 		Connection conn = null;
 		try {
 			conn = databaseConfiguration.connection();
-			LocalJasperReportsContext ctx = new LocalJasperReportsContext(DefaultJasperReportsContext.getInstance());
-			ctx.setClassLoader(getClass().getClassLoader());
-			ctx.setFileResolver(fileName -> {
-                if (fileName.endsWith(".jasper")) {
-                	try {
-	                    String key = fileName.substring(0, fileName.indexOf(".jasper")).concat(".jrxml");
-	                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cacheService.jasperSubReport(key));
-	                	File subreport = File.createTempFile("SUBREPORT", ".jasper");	                    
-	                    FileUtils.copyInputStreamToFile(byteArrayInputStream, subreport);
-	                    return subreport;
-                    } catch (IOException e) {
-                        LOGGER.error("Cannot find subreport", e);
-                    }
-                }
-                try {
-                    File image = File.createTempFile("IMAGE", ".jpg");
-                    FileUtils.copyInputStreamToFile(new ByteArrayInputStream(cacheService.imageReport(fileName)), image);
-                    return image;
-                } catch (IOException e) {
-                    LOGGER.error("Cannot find image", e);
-                }
-                return null;
-            });
-			return JasperFillManager.getInstance(ctx).fill(jasperReport,
-					printSpooler.getParameters(), conn);
+
+			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
+			JasperReportsContext jasperReportsContext = new CnrJasperReportsContext(defaultJasperReportsContext);
+			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
+
+			return jasperFillManager.fill(jasperReport, printSpooler.getParameters(), conn);
+
+
 		} catch (JRRuntimeException | SQLException | JRException e) {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
@@ -230,11 +217,102 @@ public class PrintService {
         new File(path).delete();		
 		printRepository.delete(printSpooler);
 	}
-	
 	public void deleteReport() {
     	Iterable<Long> findReporsToDelete = printRepository.findReportsToDelete();
     	for (Long pgStampa : findReporsToDelete) {
     		deleteReport(pgStampa);
 		}		
+	}
+
+
+
+	class CnrJasperReportsContext implements JasperReportsContext {
+
+		private DefaultJasperReportsContext defaultJasperReportsContext;
+
+		public CnrJasperReportsContext(DefaultJasperReportsContext defaultJasperReportsContext) {
+			this.defaultJasperReportsContext = defaultJasperReportsContext;
+		}
+
+		@Override
+		public Object getValue(String key) {
+			return defaultJasperReportsContext.getValue(key);
+		}
+
+		@Override
+		public Object getOwnValue(String key) {
+			return defaultJasperReportsContext.getOwnValue(key);
+		}
+
+		@Override
+		public void setValue(String key, Object value) {
+			defaultJasperReportsContext.setValue(key, value);
+		}
+
+		@Override
+		public <T> List<T> getExtensions(Class<T> extensionType) {
+
+			if (extensionType.isAssignableFrom(RepositoryService.class)) {
+
+				RepositoryService foo = new RepositoryService() {
+					@Override
+					public Resource getResource(String uri) {
+						throw new NotImplementedException();
+					}
+
+					@Override
+					public void saveResource(String uri, Resource resource) {
+						throw new NotImplementedException();
+					}
+
+					@Override
+					public <K extends Resource> K getResource(String uri, Class<K> resourceType) {
+
+						if (resourceType.isAssignableFrom(ReportResource.class)) {
+							String key = uri.substring(0, uri.indexOf(".jasper")).concat(".jrxml");
+							ReportResource reportResource = new ReportResource();
+							JasperReport report = cacheService.jasperSubReport(key);
+							reportResource.setReport(report);
+							return (K) reportResource;
+						} else if (resourceType.isAssignableFrom(InputStreamResource.class)) {
+							byte[] bytes = cacheService.imageReport(uri);
+							InputStreamResource inputStreamResource = new InputStreamResource();
+							InputStream inputStream = new ByteArrayInputStream(bytes);
+							inputStreamResource.setInputStream(inputStream);
+							return (K) inputStreamResource;
+						}
+
+						throw new NotImplementedException("unable to serve resource " + uri + " of type " + resourceType.getCanonicalName());
+					}
+				};
+
+				List<RepositoryService> ts = Arrays.asList(foo);
+				return (List<T>) ts;
+			} else {
+				return defaultJasperReportsContext.getExtensions(extensionType);
+			}
+
+		}
+
+		@Override
+		public String getProperty(String key) {
+			return defaultJasperReportsContext.getProperty(key);
+		}
+
+		@Override
+		public void setProperty(String key, String value) {
+			defaultJasperReportsContext.setProperty(key, value);
+
+		}
+
+		@Override
+		public void removeProperty(String key) {
+			defaultJasperReportsContext.removeProperty(key);
+		}
+
+		@Override
+		public Map<String, String> getProperties() {
+			return defaultJasperReportsContext.getProperties();
+		}
 	}
 }
