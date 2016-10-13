@@ -108,9 +108,8 @@ public class PrintService {
 			conn = databaseConfiguration.connection();
 
 			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
-			JasperReportsContext jasperReportsContext = new CnrJasperReportsContext(defaultJasperReportsContext);
+			JasperReportsContext jasperReportsContext = new CacheAwareJasperReportsContext(defaultJasperReportsContext);
 			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-
 			return jasperFillManager.fill(jasperReport, printSpooler.getParameters(), conn);
 
 
@@ -221,32 +220,32 @@ public class PrintService {
     	Iterable<Long> findReporsToDelete = printRepository.findReportsToDelete();
     	for (Long pgStampa : findReporsToDelete) {
     		deleteReport(pgStampa);
-		}		
+		}
 	}
 
 
 
-	class CnrJasperReportsContext implements JasperReportsContext {
+	class CacheAwareJasperReportsContext implements JasperReportsContext {
 
-		private DefaultJasperReportsContext defaultJasperReportsContext;
+		private JasperReportsContext jasperReportsContext;
 
-		public CnrJasperReportsContext(DefaultJasperReportsContext defaultJasperReportsContext) {
-			this.defaultJasperReportsContext = defaultJasperReportsContext;
+		public CacheAwareJasperReportsContext(JasperReportsContext jasperReportsContext) {
+			this.jasperReportsContext = jasperReportsContext;
 		}
 
 		@Override
 		public Object getValue(String key) {
-			return defaultJasperReportsContext.getValue(key);
+			return jasperReportsContext.getValue(key);
 		}
 
 		@Override
 		public Object getOwnValue(String key) {
-			return defaultJasperReportsContext.getOwnValue(key);
+			return jasperReportsContext.getOwnValue(key);
 		}
 
 		@Override
 		public void setValue(String key, Object value) {
-			defaultJasperReportsContext.setValue(key, value);
+			jasperReportsContext.setValue(key, value);
 		}
 
 		@Override
@@ -257,12 +256,12 @@ public class PrintService {
 				RepositoryService foo = new RepositoryService() {
 					@Override
 					public Resource getResource(String uri) {
-						throw new NotImplementedException();
+						throw new NotImplementedException("unable to get resource " + uri);
 					}
 
 					@Override
 					public void saveResource(String uri, Resource resource) {
-						throw new NotImplementedException();
+						throw new NotImplementedException("cannot save resource " + uri + " " + resource.getName());
 					}
 
 					@Override
@@ -289,30 +288,30 @@ public class PrintService {
 				List<RepositoryService> ts = Arrays.asList(foo);
 				return (List<T>) ts;
 			} else {
-				return defaultJasperReportsContext.getExtensions(extensionType);
+				return jasperReportsContext.getExtensions(extensionType);
 			}
 
 		}
 
 		@Override
 		public String getProperty(String key) {
-			return defaultJasperReportsContext.getProperty(key);
+			return jasperReportsContext.getProperty(key);
 		}
 
 		@Override
 		public void setProperty(String key, String value) {
-			defaultJasperReportsContext.setProperty(key, value);
+			jasperReportsContext.setProperty(key, value);
 
 		}
 
 		@Override
 		public void removeProperty(String key) {
-			defaultJasperReportsContext.removeProperty(key);
+			jasperReportsContext.removeProperty(key);
 		}
 
 		@Override
 		public Map<String, String> getProperties() {
-			return defaultJasperReportsContext.getProperties();
+			return jasperReportsContext.getProperties();
 		}
 	}
 }
