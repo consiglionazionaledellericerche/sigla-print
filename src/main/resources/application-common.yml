@@ -14,7 +14,7 @@ print:
   scheduler: 5000
   deletecron: 0 0 2 1/1 * ?
   queue.priorita: 1,2,3
-    
+
 cnr.gitlab:
   url: http://git.si.cnr.it/dev/sigla-reports/raw/master
   token: TyB9NvodV1sDyroHF4zQ
@@ -22,3 +22,9 @@ cnr.gitlab:
 logging.level.it.cnr: DEBUG
 logging.level.org.springframework.cache: TRACE
 logging.pattern.console: "%date |%-5level| [%thread] [%file:%line] - %msg%n%ex{full}"
+
+ajp:
+  port: 8009
+  timeout: 120000
+
+cache.hazelcast.packages: it.cnr
