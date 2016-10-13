@@ -250,47 +250,11 @@ public class PrintService {
 
 		@Override
 		public <T> List<T> getExtensions(Class<T> extensionType) {
-
 			if (extensionType.isAssignableFrom(RepositoryService.class)) {
-
-				RepositoryService foo = new RepositoryService() {
-					@Override
-					public Resource getResource(String uri) {
-						throw new NotImplementedException("unable to get resource " + uri);
-					}
-
-					@Override
-					public void saveResource(String uri, Resource resource) {
-						throw new NotImplementedException("cannot save resource " + uri + " " + resource.getName());
-					}
-
-					@Override
-					public <K extends Resource> K getResource(String uri, Class<K> resourceType) {
-
-						if (resourceType.isAssignableFrom(ReportResource.class)) {
-							String key = uri.substring(0, uri.indexOf(".jasper")).concat(".jrxml");
-							ReportResource reportResource = new ReportResource();
-							JasperReport report = cacheService.jasperSubReport(key);
-							reportResource.setReport(report);
-							return (K) reportResource;
-						} else if (resourceType.isAssignableFrom(InputStreamResource.class)) {
-							byte[] bytes = cacheService.imageReport(uri);
-							InputStreamResource inputStreamResource = new InputStreamResource();
-							InputStream inputStream = new ByteArrayInputStream(bytes);
-							inputStreamResource.setInputStream(inputStream);
-							return (K) inputStreamResource;
-						}
-
-						throw new NotImplementedException("unable to serve resource " + uri + " of type " + resourceType.getCanonicalName());
-					}
-				};
-
-				List<RepositoryService> ts = Arrays.asList(foo);
-				return (List<T>) ts;
+				return (List<T>) Arrays.asList(new CacheAwareRepositoryService());
 			} else {
 				return jasperReportsContext.getExtensions(extensionType);
 			}
-
 		}
 
 		@Override
@@ -314,4 +278,42 @@ public class PrintService {
 			return jasperReportsContext.getProperties();
 		}
 	}
+
+
+	class CacheAwareRepositoryService implements RepositoryService {
+
+		@Override
+		public Resource getResource(String uri) {
+			throw new NotImplementedException("unable to get resource " + uri);
+		}
+
+		@Override
+		public void saveResource(String uri, Resource resource) {
+			throw new NotImplementedException("cannot save resource " + uri + " " + resource.getName());
+		}
+
+		@Override
+		public <K extends Resource> K getResource(String uri, Class<K> resourceType) {
+
+			if (resourceType.isAssignableFrom(ReportResource.class)) {
+				String key = uri.substring(0, uri.indexOf(".jasper")).concat(".jrxml");
+				ReportResource reportResource = new ReportResource();
+				JasperReport report = cacheService.jasperSubReport(key);
+				reportResource.setReport(report);
+				return (K) reportResource;
+			} else if (resourceType.isAssignableFrom(InputStreamResource.class)) {
+				InputStreamResource inputStreamResource = new InputStreamResource();
+				byte[] bytes = cacheService.imageReport(uri);
+				InputStream inputStream = new ByteArrayInputStream(bytes);
+				inputStreamResource.setInputStream(inputStream);
+				return (K) inputStreamResource;
+			}
+
+			throw new NotImplementedException("unable to serve resource " + uri + " of type " + resourceType.getCanonicalName());
+		}
+
+	}
+
+
+
 }
