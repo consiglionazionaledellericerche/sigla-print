@@ -6,36 +6,13 @@ import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.PrintRepository;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRRuntimeException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.util.FileResolver;
 import net.sf.jasperreports.engine.util.LocalJasperReportsContext;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
-
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +22,17 @@ import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by francesco on 09/09/16.
@@ -116,23 +104,20 @@ public class PrintService {
 			conn = databaseConfiguration.connection();
 			LocalJasperReportsContext ctx = new LocalJasperReportsContext(DefaultJasperReportsContext.getInstance());
 			ctx.setClassLoader(getClass().getClassLoader());
-			ctx.setFileResolver(new FileResolver() {
-				@Override
-				public File resolveFile(String s) {
-					if (s.endsWith(".jasper")) {
-						String key = s.substring(0, s.indexOf(".jasper")).concat(".jrxml");
-						return new File(cacheService.jasperSubReport(key));
-					}
-					try {
-						File image = File.createTempFile("IMAGE", ".jpg");
-						FileUtils.copyInputStreamToFile(new ByteArrayInputStream(cacheService.imageReport(s)), image);
-						return image;
-					} catch (IOException e) {
-						LOGGER.error("Cannot find image", e);
-					}
-					return null;
-				}
-			});        	
+			ctx.setFileResolver(fileName -> {
+                if (fileName.endsWith(".jasper")) {
+                    String key = fileName.substring(0, fileName.indexOf(".jasper")).concat(".jrxml");
+                    return new File(cacheService.jasperSubReport(key));
+                }
+                try {
+                    File image = File.createTempFile("IMAGE", ".jpg");
+                    FileUtils.copyInputStreamToFile(new ByteArrayInputStream(cacheService.imageReport(fileName)), image);
+                    return image;
+                } catch (IOException e) {
+                    LOGGER.error("Cannot find image", e);
+                }
+                return null;
+            });
 			return JasperFillManager.getInstance(ctx).fill(jasperReport,
 					printSpooler.getParameters(), conn);
 		} catch (JRRuntimeException | SQLException | JRException e) {
