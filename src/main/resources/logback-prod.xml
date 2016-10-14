@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
+    <property name="syslog.url" value="${syslog.url:-sigla-print.cedrc.cnr.it}" />
     <include resource="logging/properties/prod.xml" />
     <include resource="logging/base.xml" />
 </configuration>
