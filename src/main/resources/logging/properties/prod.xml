@@ -8,7 +8,7 @@
 
     <!-- Syslog -->
     <property name="syslog.host" value="${syslog.host:-logsrv.cedrc.cnr.it}" />
-    <property name="syslog.port" value="${syslog.port:-1514}" />
+    <property name="syslog.port" value="${syslog.port:-1517}" />
     <property name="syslog.url" value="${syslog.url:-unknown}" />
 
 </included>
