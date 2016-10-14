@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+syslog appender
+-->
+
+<included>
+    <appender name="SYSLOG APPENDER" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>logsrv.cedrc.cnr.it</syslogHost>
+        <port>1517</port>
+        <facility>LOCAL1</facility>
+        <suffixPattern>sigla-print.cedrc.cnr.it | %d | %-5p | %c:%L | %t | %m%n</suffixPattern>
+    </appender>
+    <appender name="ASYNC_SYSLOG_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="SYSLOG APPENDER" />
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+</included>
