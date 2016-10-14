@@ -6,7 +6,33 @@ import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.PrintRepository;
-import net.sf.jasperreports.engine.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
+import javax.persistence.OptimisticLockException;
+
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRRuntimeException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -16,6 +42,7 @@ import net.sf.jasperreports.repo.InputStreamResource;
 import net.sf.jasperreports.repo.ReportResource;
 import net.sf.jasperreports.repo.RepositoryService;
 import net.sf.jasperreports.repo.Resource;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
@@ -26,17 +53,6 @@ import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by francesco on 09/09/16.
@@ -130,11 +146,15 @@ public class PrintService {
 				Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
 				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
 		if (pgStampa != null) {
-			PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
-			printSpooler.setStato(PrintState.X);
-			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-			printRepository.save(printSpooler);
-			return printSpooler;
+			try {
+				PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
+				printSpooler.setStato(PrintState.X);
+				printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+				printRepository.save(printSpooler);
+				return printSpooler;				
+			} catch (OptimisticLockException _ex) {
+				LOGGER.warn("Cannot obtain lock pgStampa: {}", pgStampa, _ex);
+			}
 		}
 		return null;
 	}
