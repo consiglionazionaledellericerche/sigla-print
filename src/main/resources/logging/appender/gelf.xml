@@ -6,8 +6,8 @@ gelf appender
 
 <included>
     <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
-        <remoteHost>dockmanag.cedrc.cnr.it</remoteHost>
-        <port>3514</port>
+        <remoteHost>${gelf.host}</remoteHost>
+        <port>${gelf.port}</port>
         <encoder class="me.moocar.logbackgelf.GZIPEncoder">
             <layout class="me.moocar.logbackgelf.GelfLayout">
                 <useLoggerName>true</useLoggerName>

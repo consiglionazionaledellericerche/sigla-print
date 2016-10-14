@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<included>
+
+    <!-- Graylog Extended Log Format (GELF) -->
+    <property name="gelf.host" value="${gelf.host:-graylogpreprod}" />
+    <property name="gelf.port" value="${gelf.port:-3514}" />
+
+    <!-- Syslog -->
+    <property name="syslog.host" value="${syslog.host:-syslogpreprod}" />
+    <property name="syslog.port" value="${syslog.port:-1514}" />
+    <property name="syslog.url" value="${syslog.url:-unknown}" />
+
+</included>
