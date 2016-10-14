@@ -24,3 +24,18 @@ ajp:
   timeout: 120000
 
 cache.hazelcast.packages: it.cnr
+
+logging.config: classpath:logback-local.xml
+
+spring.jpa:
+  hibernate.ddl-auto: none # update per generazione schema
+  properties:
+    hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+    hibernate.connection.autocommit: false
+#  database-platform: org.hibernate.dialect.Oracle10gDialect
+
+spring.datasource:
+  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
+  username: PCIR009
+  password: dbform
+  driverClassName: oracle.jdbc.OracleDriver

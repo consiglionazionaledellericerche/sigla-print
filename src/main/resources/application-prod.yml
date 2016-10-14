@@ -1,15 +1,5 @@
-spring.jpa:
-  hibernate.ddl-auto: none # update per generazione schema
-  properties:
-    hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
-    hibernate.connection.autocommit: false
-#  database-platform: org.hibernate.dialect.Oracle10gDialect
+logging.config: classpath:logback-prod.xml
 
 print:
   server.url: http://localhost:8080
 
-spring.datasource:
-  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
-  username: PCIR009
-  password: dbform
-  driverClassName: oracle.jdbc.OracleDriver
