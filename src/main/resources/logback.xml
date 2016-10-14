@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <include resource="logback-gelf.xml" />
+    <include resource="logback-syslog.xml" />
+
+    <logger name="it.cnr" level="INFO"/>
+
+    <root level="WARN">
+        <appender-ref ref="ASYNC_GELF_APPENDER" />
+        <appender-ref ref="ASYNC_SYSLOG_APPENDER" />
+        <appender-ref ref="FILE" />
+    </root>
+
+</configuration>
