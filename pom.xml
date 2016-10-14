@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>sigla-print</artifactId>
-	<version>0.0.10-SNAPSHOT</version>
+	<version>0.0.10</version>
 	<packaging>war</packaging>
 
 	<name>sigla-print</name>
@@ -210,7 +210,7 @@
   <scm>
     <connection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</connection>
     <developerConnection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>sigla-print-0.0.10</tag>
   </scm>
 
 </project>
