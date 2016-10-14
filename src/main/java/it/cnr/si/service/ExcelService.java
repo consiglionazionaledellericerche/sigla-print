@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import javax.persistence.OptimisticLockException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -65,11 +67,15 @@ public class ExcelService {
 		Long pgEstrazione = excelRepository.findExcelToExecute(Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
 				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
 		if (pgEstrazione != null) {
-			ExcelSpooler excelSpooler = excelRepository.findOneForUpdate(pgEstrazione);
-			excelSpooler.setStato(PrintState.X.name());
-			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-			excelRepository.save(excelSpooler);
-			return excelSpooler;
+			try {
+				ExcelSpooler excelSpooler = excelRepository.findOneForUpdate(pgEstrazione);
+				excelSpooler.setStato(PrintState.X.name());
+				excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+				excelRepository.save(excelSpooler);
+				return excelSpooler;
+			} catch (OptimisticLockException _ex) {
+				LOGGER.warn("Cannot obtain lock pgEstrazione: {}", pgEstrazione, _ex);
+			}			
 		}
 		return null;
 	}
