@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
@@ -164,7 +165,7 @@ public class PrintService {
 		LOGGER.error("Error executing report with pgStampa: {}", printSpooler.getPgStampa(), _ex);
 		printSpooler.setStato(PrintState.E);
 		printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-		printSpooler.setErrore(_ex.getCause().getMessage());
+		printSpooler.setErrore(Optional.ofNullable(_ex.getCause()).map(Throwable::getMessage).orElse(_ex.getMessage()));
 		printRepository.save(printSpooler);			
 	}
 	
