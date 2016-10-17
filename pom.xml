@@ -21,6 +21,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<spring-boot.version>1.4.1.RELEASE</spring-boot.version>
+		<sprint.version>2.0.5</sprint.version>
 	</properties>
 
 	<dependencyManagement>
@@ -118,8 +119,13 @@
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.si.sprint</groupId>
+			<artifactId>sprint-logging</artifactId>
+			<version>${sprint.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>it.cnr.si.sprint</groupId>
 			<artifactId>sprint-custom</artifactId>
-			<version>2.0.4</version>
+			<version>${sprint.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>me.moocar</groupId>
