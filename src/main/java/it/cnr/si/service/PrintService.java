@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.CounterService;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,8 +154,8 @@ public class PrintService {
 				printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 				printRepository.save(printSpooler);
 				return printSpooler;				
-			} catch (OptimisticLockException _ex) {
-				LOGGER.warn("Cannot obtain lock pgStampa: {}", pgStampa, _ex);
+			} catch (OptimisticLockException|ObjectOptimisticLockingFailureException _ex) {
+				LOGGER.info("Cannot obtain lock pgStampa: {}", pgStampa, _ex);
 			}
 		}
 		return null;
