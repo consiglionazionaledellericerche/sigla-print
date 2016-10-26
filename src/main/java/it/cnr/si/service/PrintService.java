@@ -118,7 +118,6 @@ public class PrintService {
 		return outputStream;
 	}
 	
-	@Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=true)
 	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler)  {
 		LOGGER.info("jasperReport = {}", jasperReport);
 		Connection conn = null;
@@ -135,6 +134,7 @@ public class PrintService {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
 			try {
+				conn.rollback();
 				conn.close();
 			} catch (SQLException e) {
 				throw new JasperRuntimeException("unable to process report", e);
