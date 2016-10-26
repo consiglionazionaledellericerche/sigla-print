@@ -56,7 +56,7 @@ public class PrintResource {
 
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
-        LOGGER.info("print request: {}", printSpooler);
+        LOGGER.info("print request: {}", printSpooler.getReport());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
