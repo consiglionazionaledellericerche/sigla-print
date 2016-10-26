@@ -275,7 +275,7 @@ public class PrintService {
 			if (extensionType.isAssignableFrom(RepositoryService.class)) {
 				return (List<T>) Arrays.asList(new CacheAwareRepositoryService());
 			} else {
-				return jasperReportsContext.getExtensions(extensionType);
+				return jasperReportsContext.getExtensions(extensionType).stream().distinct().collect(Collectors.toList());
 			}
 		}
 
