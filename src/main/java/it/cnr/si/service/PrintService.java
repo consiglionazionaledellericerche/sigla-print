@@ -119,7 +119,7 @@ public class PrintService {
 	}
 	
 	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler)  {
-		LOGGER.info("jasperReport = {}", jasperReport);
+		LOGGER.info("jasperReportName = {}", printSpooler.getReport());
 		Connection conn = null;
 		try {
 			conn = databaseConfiguration.connection();
@@ -142,23 +142,19 @@ public class PrintService {
 		}
 	}
 	
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	public PrintSpooler print(Integer priorita) {
-		Long pgStampa = printRepository.findReportToExecute(priorita, 
+	public Long print(Integer priorita) {
+		return printRepository.findReportToExecute(priorita, 
 				Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
 				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
-		if (pgStampa != null) {
-			try {
-				PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
-				printSpooler.setStato(PrintState.X);
-				printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-				printRepository.save(printSpooler);
-				return printSpooler;				
-			} catch (OptimisticLockException|ObjectOptimisticLockingFailureException _ex) {
-				LOGGER.info("Cannot obtain lock pgStampa: {}", pgStampa, _ex);
-			}
-		}
-		return null;
+	}
+
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	public PrintSpooler print(Long pgStampa) {
+		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
+		printSpooler.setStato(PrintState.X);
+		printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+		printRepository.save(printSpooler);
+		return printSpooler;				
 	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)	
@@ -176,7 +172,7 @@ public class PrintService {
 		try {
 			File output = new File(Arrays.asList(printOutputDir,userName, name).stream().collect(Collectors.joining(fileSeparator)));
 			FileUtils.writeByteArrayToFile(output, byteArrayOutputStream.toByteArray());
-			PrintSpooler printSpooler = printRepository.findOneForUpdate(pgStampa);
+			PrintSpooler printSpooler = printRepository.findOne(pgStampa);
 	        if (printSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
                 data_da.setTime(printSpooler.getDtProssimaEsecuzione());

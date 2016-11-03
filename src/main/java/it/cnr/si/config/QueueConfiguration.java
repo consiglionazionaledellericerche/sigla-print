@@ -26,7 +26,8 @@ import com.hazelcast.core.ItemListener;
 
 @Configuration
 public class QueueConfiguration implements InitializingBean{
-    private static final String PDF = "PDF_";
+    private static final String DELETEFILE = "DELETEFILE";
+	private static final String PDF = "PDF_";
 	private static final String XLS = "XLS_";
 	private static final String SIGLA_PRIORITA = "SIGLA_PRIORITA_";
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueConfiguration.class);    
@@ -61,12 +62,14 @@ public class QueueConfiguration implements InitializingBean{
                 LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
                     LOGGER.trace("PrintApplicationListener consuming {}", priorita);
-                    PrintSpooler print = printService.print(Integer.valueOf(priorita));
-                    if (print != null) {                    	
-                    	String lockKey = PDF.concat(String.valueOf(print.getPgStampa()));
+                    Long pgStampa = printService.print(Integer.valueOf(priorita));
+                    PrintSpooler print = null;
+                    if (pgStampa != null) {                    	
+                    	String lockKey = PDF.concat(String.valueOf(pgStampa));
                     	ILock lock = hazelcastInstance.getLock(lockKey);
                     	try {
-                        	if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {                            	
+                        	if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {  
+                        		print = printService.print(pgStampa);
                         		JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
                             	printService.executeReport(jasperPrint, print.getPgStampa(), 
                             			print.getName(), 
@@ -75,7 +78,8 @@ public class QueueConfiguration implements InitializingBean{
                     	} catch (InterruptedException e) {
                 			//Nothing to do
                 		} catch (Exception _ex) {
-                    		printService.error(print, _ex);
+                			if (print != null)
+                				printService.error(print, _ex);
                     	} finally {
                             LOGGER.info("unlocking {}", lockKey);
             				lock.unlock();                    		
@@ -105,6 +109,20 @@ public class QueueConfiguration implements InitializingBean{
 			return null;
 		} finally {
             LOGGER.info("unlocking {}", lockKey);
+			lock.unlock();                    					
+		}
+	}
+
+	public void delete() {
+    	ILock lock = hazelcastInstance.getLock(DELETEFILE);
+		try {
+			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
+				printService.deleteReport();
+		    	excelService.deleteXls();		
+			}
+		} catch (InterruptedException e) {
+		} finally {
+            LOGGER.info("unlocking {}", DELETEFILE);
 			lock.unlock();                    					
 		}
 	}	

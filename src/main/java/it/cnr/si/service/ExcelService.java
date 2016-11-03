@@ -68,7 +68,7 @@ public class ExcelService {
 				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
 		if (pgEstrazione != null) {
 			try {
-				ExcelSpooler excelSpooler = excelRepository.findOneForUpdate(pgEstrazione);
+				ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
 				excelSpooler.setStato(PrintState.X.name());
 				excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 				excelRepository.save(excelSpooler);

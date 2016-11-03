@@ -47,7 +47,6 @@ public class PrintConfiguration {
     
     @Scheduled(cron = "${print.deletecron}")
     public void delete() {
-    	printService.deleteReport();
-    	excelService.deleteXls();
+    	queueConfiguration.delete();
     }
 }
