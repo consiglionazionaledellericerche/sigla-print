@@ -68,23 +68,27 @@ public class QueueConfiguration implements InitializingBean{
                     	String lockKey = PDF.concat(String.valueOf(pgStampa));
                     	ILock lock = hazelcastInstance.getLock(lockKey);
                     	try {
-                        	if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {  
-                        		print = printService.print(pgStampa);
-                        		JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
-                            	printService.executeReport(jasperPrint, print.getPgStampa(), 
-                            			print.getName(), 
-                            			print.getUtcr());
-                        	}
-                    	} catch (InterruptedException e) {
-                			//Nothing to do
-                		} catch (Exception _ex) {
-                			if (print != null)
-                				printService.error(print, _ex);
-                    	} finally {
-                            LOGGER.info("unlocking {}", lockKey);
-            				lock.unlock();                    		
-                    	}
-                    }
+							if (lock.tryLock ( 2, TimeUnit.SECONDS ) ) {  
+								try {
+							    		print = printService.print(pgStampa);
+							    		JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
+							        	printService.executeReport(jasperPrint, print.getPgStampa(), 
+							        			print.getName(), 
+							        			print.getUtcr());
+								} catch (Exception _ex) {
+									if (print != null)
+										printService.error(print, _ex);
+								} finally {
+							        LOGGER.info("unlocking {}", lockKey);
+									lock.unlock();                    		
+								}
+							} else {
+								LOGGER.info("unable to get lock {}", lockKey);				
+							}
+						} catch (InterruptedException e) {
+							//Nothing to do
+						}
+                	}
                     LOGGER.trace("PrintApplicationListener consumed {}", priorita);
                 }
             }
@@ -102,14 +106,19 @@ public class QueueConfiguration implements InitializingBean{
     	ILock lock = hazelcastInstance.getLock(lockKey);
 		try {
 			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
-				return excelService.executeExcel(excelSpooler);
+				try {
+					return excelService.executeExcel(excelSpooler);					
+				} finally {
+		            LOGGER.info("unlocking {}", lockKey);
+					lock.unlock();
+				}
+			} else {
+				LOGGER.info("unable to get lock {}", lockKey);				
 			}
 			return null;
 		} catch (InterruptedException e) {
+			//Nothing to do
 			return null;
-		} finally {
-            LOGGER.info("unlocking {}", lockKey);
-			lock.unlock();                    					
 		}
 	}
 
@@ -117,13 +126,17 @@ public class QueueConfiguration implements InitializingBean{
     	ILock lock = hazelcastInstance.getLock(DELETEFILE);
 		try {
 			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
-				printService.deleteReport();
-		    	excelService.deleteXls();		
+				try {
+					printService.deleteReport();
+			    	excelService.deleteXls();
+				}finally {
+		            LOGGER.info("unlocking {}", DELETEFILE);
+					lock.unlock();                    					
+				}
+			} else {
+				LOGGER.info("unable to get lock {}", DELETEFILE);
 			}
 		} catch (InterruptedException e) {
-		} finally {
-            LOGGER.info("unlocking {}", DELETEFILE);
-			lock.unlock();                    					
-		}
+		} 
 	}	
 }
