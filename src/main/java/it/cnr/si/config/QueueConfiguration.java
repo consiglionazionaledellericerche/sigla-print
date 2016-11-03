@@ -1,10 +1,13 @@
 package it.cnr.si.config;
 
+import it.cnr.si.domain.sigla.ExcelSpooler;
 import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.service.CacheService;
+import it.cnr.si.service.ExcelService;
 import it.cnr.si.service.PrintService;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.jasperreports.engine.JasperPrint;
 
@@ -16,13 +19,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ILock;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ItemEvent;
 import com.hazelcast.core.ItemListener;
 
 @Configuration
 public class QueueConfiguration implements InitializingBean{
-    private static final String SIGLA_PRIORITA = "SIGLA_PRIORITA_";
+    private static final String PDF = "PDF_";
+	private static final String XLS = "XLS_";
+	private static final String SIGLA_PRIORITA = "SIGLA_PRIORITA_";
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueConfiguration.class);    
 
     @Value("#{'${print.queue.priorita}'.split(',')}")
@@ -33,6 +39,9 @@ public class QueueConfiguration implements InitializingBean{
     
     @Autowired
     private PrintService printService;
+
+    @Autowired
+    private ExcelService excelService;
 
     @Autowired
     private CacheService cacheService;
@@ -53,14 +62,23 @@ public class QueueConfiguration implements InitializingBean{
                 if (removed) {
                     LOGGER.trace("PrintApplicationListener consuming {}", priorita);
                     PrintSpooler print = printService.print(Integer.valueOf(priorita));
-                    if (print != null) {
+                    if (print != null) {                    	
+                    	String lockKey = PDF.concat(String.valueOf(print.getPgStampa()));
+                    	ILock lock = hazelcastInstance.getLock(lockKey);
                     	try {
-                        	JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
-                        	printService.executeReport(jasperPrint, print.getPgStampa(), 
-                        			print.getName(), 
-                        			print.getUtcr());                    		
-                    	} catch (Exception _ex) {
+                        	if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {                            	
+                        		JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
+                            	printService.executeReport(jasperPrint, print.getPgStampa(), 
+                            			print.getName(), 
+                            			print.getUtcr());
+                        	}
+                    	} catch (InterruptedException e) {
+                			//Nothing to do
+                		} catch (Exception _ex) {
                     		printService.error(print, _ex);
+                    	} finally {
+                            LOGGER.info("unlocking {}", lockKey);
+            				lock.unlock();                    		
                     	}
                     }
                     LOGGER.trace("PrintApplicationListener consumed {}", priorita);
@@ -75,4 +93,19 @@ public class QueueConfiguration implements InitializingBean{
             queuePrintApplication(priorita).addItemListener(printApplicationListener, true);			
 		}		
 	}
+	public Long executeExcel(ExcelSpooler excelSpooler) {
+    	String lockKey = XLS.concat(String.valueOf(excelSpooler.getPgEstrazione()));
+    	ILock lock = hazelcastInstance.getLock(lockKey);
+		try {
+			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
+				return excelService.executeExcel(excelSpooler);
+			}
+			return null;
+		} catch (InterruptedException e) {
+			return null;
+		} finally {
+            LOGGER.info("unlocking {}", lockKey);
+			lock.unlock();                    					
+		}
+	}	
 }
