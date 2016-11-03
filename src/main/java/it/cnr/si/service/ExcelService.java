@@ -116,7 +116,7 @@ public class ExcelService {
 
 			rownum = creaIntestazioni(excelSpooler.getExcelSpoolerParams(), cellnum, rownum, s, cellStyle, cellHeaderStyle);
 			while(rs.next()) {
-				LOGGER.info("Creazione riga:{}", rownum);
+				LOGGER.debug("Creazione riga:{}", rownum);
 				if (new Integer(rownum).compareTo(MAX_RIGHE_FOGLIO) > 0){
 					rownum = 0;
 					numSheet++;

@@ -42,7 +42,7 @@ public class PrintConfiguration {
     	for (String priorita : queuePriorita) {
     		queueConfiguration.queuePrintApplication(priorita).add(priorita);
 		}
-        Optional.ofNullable(excelService.print()).map(map -> excelService.executeExcel(map));    	
+        Optional.ofNullable(excelService.print()).map(map -> queueConfiguration.executeExcel(map));    	
     }
     
     @Scheduled(cron = "${print.deletecron}")
