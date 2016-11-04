@@ -67,6 +67,7 @@ public class QueueConfiguration implements InitializingBean{
                     if (pgStampa != null) {                    	
                     	String lockKey = PDF.concat(String.valueOf(pgStampa));
                     	ILock lock = hazelcastInstance.getLock(lockKey);
+                    	LOGGER.info("try lock {}", lockKey);	
                     	try {
 							if (lock.tryLock ( 2, TimeUnit.SECONDS ) ) {  
 								try {
@@ -105,6 +106,7 @@ public class QueueConfiguration implements InitializingBean{
     	String lockKey = XLS.concat(String.valueOf(excelSpooler.getPgEstrazione()));
     	ILock lock = hazelcastInstance.getLock(lockKey);
 		try {
+        	LOGGER.info("try lock {}", lockKey);			
 			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
 				try {
 					return excelService.executeExcel(excelSpooler);					
@@ -125,6 +127,7 @@ public class QueueConfiguration implements InitializingBean{
 	public void delete() {
     	ILock lock = hazelcastInstance.getLock(DELETEFILE);
 		try {
+        	LOGGER.info("try lock {}", DELETEFILE);				
 			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
 				try {
 					printService.deleteReport();
