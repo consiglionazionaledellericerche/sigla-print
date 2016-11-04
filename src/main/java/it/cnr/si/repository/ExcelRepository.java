@@ -2,11 +2,8 @@ package it.cnr.si.repository;
 
 import it.cnr.si.domain.sigla.ExcelSpooler;
 
-import java.util.Date;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -15,8 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ExcelRepository extends CrudRepository<ExcelSpooler, Long> {
 	@Query("SELECT MIN(pgEstrazione) FROM ExcelSpooler WHERE "
-			+ "((stato = 'C' and dtProssimaEsecuzione is null) or (stato IN ('C', 'S') and dtProssimaEsecuzione BETWEEN ?1 AND ?2 ))")	
-	public Long findExcelToExecute(@Param("dataInizio")Date dataInizio, @Param("dataFine")Date dataFine);
+			+ "((stato = 'C' and dtProssimaEsecuzione is null) or (stato IN ('C', 'S') and dtProssimaEsecuzione < SYSADTE))")	
+	public Long findExcelToExecute();
 	
     @Query("select p.pgEstrazione from ExcelSpooler p, ParametriEnte e  where e.attivo = 'Y' and p.stato = 'S' and p.dtProssimaEsecuzione is null AND TRUNC(SYSDATE - p.duva) > Nvl(e.cancellaStampe,30)")
 	Iterable<Long> findXlsToDelete();	

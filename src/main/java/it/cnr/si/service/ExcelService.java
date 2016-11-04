@@ -64,8 +64,7 @@ public class ExcelService {
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public ExcelSpooler print() {
-		Long pgEstrazione = excelRepository.findExcelToExecute(Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
-				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
+		Long pgEstrazione = excelRepository.findExcelToExecute();    
 		if (pgEstrazione != null) {
 			try {
 				ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);

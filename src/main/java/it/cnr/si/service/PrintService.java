@@ -25,8 +25,6 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
-import javax.persistence.OptimisticLockException;
-
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRRuntimeException;
@@ -51,7 +49,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.CounterService;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,9 +140,7 @@ public class PrintService {
 	}
 	
 	public Long print(Integer priorita) {
-		return printRepository.findReportToExecute(priorita, 
-				Date.from(ZonedDateTime.now().withMinute(0).withSecond(0).toInstant()), 
-				Date.from(ZonedDateTime.now().withMinute(59).withSecond(59).toInstant()));    
+		return printRepository.findReportToExecute(priorita);    
 	}
 
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
