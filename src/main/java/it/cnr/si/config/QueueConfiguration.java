@@ -69,7 +69,7 @@ public class QueueConfiguration implements InitializingBean{
                     	ILock lock = hazelcastInstance.getLock(lockKey);
                     	LOGGER.info("try lock {}", lockKey);	
                     	try {
-							if (lock.tryLock ( 2, TimeUnit.SECONDS ) ) {  
+							if (lock.tryLock ( 1, TimeUnit.SECONDS ) ) {  
 								try {
 							    		print = printService.print(pgStampa);
 							    		JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
@@ -107,7 +107,7 @@ public class QueueConfiguration implements InitializingBean{
     	ILock lock = hazelcastInstance.getLock(lockKey);
 		try {
         	LOGGER.info("try lock {}", lockKey);			
-			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
+			if ( lock.tryLock ( 1, TimeUnit.SECONDS ) ) {
 				try {
 					return excelService.executeExcel(excelSpooler);					
 				} finally {
@@ -128,7 +128,7 @@ public class QueueConfiguration implements InitializingBean{
     	ILock lock = hazelcastInstance.getLock(DELETEFILE);
 		try {
         	LOGGER.info("try lock {}", DELETEFILE);				
-			if ( lock.tryLock ( 2, TimeUnit.SECONDS ) ) {
+			if ( lock.tryLock ( 1, TimeUnit.SECONDS ) ) {
 				try {
 					printService.deleteReport();
 			    	excelService.deleteXls();
