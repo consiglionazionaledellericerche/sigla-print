@@ -131,7 +131,7 @@ public class PrintService {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
 			try {
-				conn.rollback();
+				conn.commit();
 				conn.close();
 			} catch (SQLException e) {
 				throw new JasperRuntimeException("unable to process report", e);
