@@ -13,7 +13,7 @@ public class Stampa_pdg_rendicontoScriptlet extends JRDefaultScriptlet {
 		java.sql.Connection conn = (java.sql.Connection)getParameterValue(JRParameter.REPORT_CONNECTION);
 		java.sql.CallableStatement cs = null; 
 		try{	        
-			cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?,?,?,?)}");
 			cs.setObject(1,(java.lang.Integer)getParameterValue("P_ESERCIZIO") );
 			cs.setObject(2,(java.lang.String)getParameterValue("P_TIPO"));
 			cs.setObject(3,(java.lang.Integer)getParameterValue("P_NUM_LIV"));
