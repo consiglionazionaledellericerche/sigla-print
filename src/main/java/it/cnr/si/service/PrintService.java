@@ -69,6 +69,7 @@ public class PrintService {
 	private String serverURL;
 	
 	private final CounterService counterService;
+	public static final String TIMES_NEW_ROMAN = "Times New Roman";
 
 	@Autowired
 	public PrintService(CounterService counterService) {
@@ -108,7 +109,10 @@ public class PrintService {
 
 			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
 
+
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
+			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
+			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.font.name", TIMES_NEW_ROMAN);
 
 			JasperReportsContext jasperReportsContext = new CacheAwareJasperReportsContext(defaultJasperReportsContext);
 			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
