@@ -13,16 +13,13 @@ public class Stampa_pdg_rendicontoScriptlet extends JRDefaultScriptlet {
 		java.sql.Connection conn = (java.sql.Connection)getParameterValue(JRParameter.REPORT_CONNECTION);
 		java.sql.CallableStatement cs = null; 
 		try{	        
-			cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?)}");
 			cs.setObject(1,(java.lang.Integer)getParameterValue("P_ESERCIZIO") );
 			cs.setObject(2,(java.lang.String)getParameterValue("P_TIPO"));
 			cs.setObject(3,(java.lang.Integer)getParameterValue("P_NUM_LIV"));
 			cs.setObject(4,(java.lang.String)getParameterValue("P_TIPO_AGGREGAZIONE"));
 			cs.setObject(5,(java.lang.String)getParameterValue("P_TIPO_RENDICONTO"));
 			cs.setObject(6,(java.lang.String)getParameterValue("P_ORIGINE"));
-			cs.setObject(7,String.valueOf("N")); //P_COMPLETA
-			cs.setObject(8,String.valueOf("N")); //P_AGG_TABLE_TEMP
-			cs.setObject(9,String.valueOf("SYSTEM")); //P_UTCR
 			cs.executeQuery();
 		}catch (Throwable e) {
 			throw new JRScriptletException(e.getMessage());
