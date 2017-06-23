@@ -7,34 +7,8 @@ import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
-
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-
-import javax.persistence.OptimisticLockException;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +17,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.OptimisticLockException;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.Date;
+import java.util.stream.Collectors;
+
 @Service
 public class ExcelService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExcelService.class);	
@@ -50,11 +35,12 @@ public class ExcelService {
 	
 	@Value("${file.separator}")
 	private String fileSeparator;	
-	@Value("${print.output.dir}")
-	private String printOutputDir;
 	@Value("${print.server.url}")
 	private String serverURL;
-	
+
+	@Autowired
+	private StorageService storageService;
+
 	@Autowired
 	private ExcelRepository excelRepository;
 	@Autowired
@@ -154,9 +140,19 @@ public class ExcelService {
 					}  
 				}
 			}
-			File output = new File(Arrays.asList(printOutputDir,excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator)));
+			List<String> strings = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName());
+			String collect = strings.stream().collect(Collectors.joining(fileSeparator));
+			File output = new File(collect);
+
+
 			wb.write(FileUtils.openOutputStream(output, true));// assegno lo stream al FileOutputStream
-	        if (excelSpooler.getDtProssimaEsecuzione() != null){
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			wb.write(baos);
+			storageService.write(collect, baos);
+
+
+			if (excelSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
                 data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
                 int addType = Calendar.DATE;
@@ -265,8 +261,11 @@ public class ExcelService {
 	public void deleteXls(Long pgEstrazione) {
 		LOGGER.info("Try to delete excel pgEstrazione: {}", pgEstrazione);
 		ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
-        String path = Arrays.asList(printOutputDir, excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
-        new File(path).delete();		
+        String path = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+//        new File(path).delete();
+
+        storageService.delete(path);
+
         excelRepository.delete(excelSpooler);
 	}
 	
