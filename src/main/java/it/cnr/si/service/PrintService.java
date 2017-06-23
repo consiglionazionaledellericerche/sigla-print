@@ -16,7 +16,6 @@ import net.sf.jasperreports.repo.InputStreamResource;
 import net.sf.jasperreports.repo.ReportResource;
 import net.sf.jasperreports.repo.RepositoryService;
 import net.sf.jasperreports.repo.Resource;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +61,11 @@ public class PrintService {
 	@Value("${file.separator}")
 	private String fileSeparator;
 
-	@Value("${print.output.dir}")
-	private String printOutputDir;
-
 	@Value("${print.server.url}")
 	private String serverURL;
+
+	@Autowired
+	private StorageService storageService;
 	
 	private final CounterService counterService;
 	public static final String TIMES_NEW_ROMAN = "Times New Roman";
@@ -157,8 +156,16 @@ public class PrintService {
 	public Long executeReport(JasperPrint jasperPrint, Long pgStampa, String name, String userName) {
 		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
 		try {
-			File output = new File(Arrays.asList(printOutputDir,userName, name).stream().collect(Collectors.joining(fileSeparator)));
-			FileUtils.writeByteArrayToFile(output, byteArrayOutputStream.toByteArray());
+			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
+//			File output = new File(collect);
+//			FileUtils.writeByteArrayToFile(output, byteArrayOutputStream.toByteArray());
+
+			File output = null;
+			LOGGER.error("file output!!!");
+			storageService.write(collect, byteArrayOutputStream);
+
+
+
 			PrintSpooler printSpooler = printRepository.findOne(pgStampa);
 	        if (printSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
@@ -217,8 +224,8 @@ public class PrintService {
 	public void deleteReport(Long pgStampa) {
 		LOGGER.info("Try to delete report pgStampa: {}", pgStampa);
 		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
-        String path = Arrays.asList(printOutputDir, printSpooler.getUtcr(), printSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
-        new File(path).delete();		
+        String path = Arrays.asList(printSpooler.getUtcr(), printSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+        storageService.delete(path);
 		printRepository.delete(printSpooler);
 	}
 	public void deleteReport() {
