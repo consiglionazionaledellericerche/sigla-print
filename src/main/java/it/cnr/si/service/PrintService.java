@@ -16,6 +16,7 @@ import net.sf.jasperreports.repo.InputStreamResource;
 import net.sf.jasperreports.repo.ReportResource;
 import net.sf.jasperreports.repo.RepositoryService;
 import net.sf.jasperreports.repo.Resource;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,14 +158,14 @@ public class PrintService {
 		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
 		try {
 			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
-//			File output = new File(collect);
-//			FileUtils.writeByteArrayToFile(output, byteArrayOutputStream.toByteArray());
 
-			File output = null;
-			LOGGER.error("file output!!!");
-			storageService.write(collect, byteArrayOutputStream);
+			byte[] byteArray = byteArrayOutputStream.toByteArray();
+			storageService.write(collect, byteArray);
 
-
+			//TODO: serve ?!?
+			File output = new File(collect);
+			FileUtils.writeByteArrayToFile(output, byteArray);
+			LOGGER.error("file output {} !!! - usare tmp file ?", collect);
 
 			PrintSpooler printSpooler = printRepository.findOne(pgStampa);
 	        if (printSpooler.getDtProssimaEsecuzione() != null){

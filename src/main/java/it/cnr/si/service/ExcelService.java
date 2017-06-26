@@ -149,8 +149,9 @@ public class ExcelService {
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			wb.write(baos);
-			storageService.write(collect, baos);
 
+			byte[] byteArray = baos.toByteArray();
+			storageService.write(collect, byteArray);
 
 			if (excelSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
@@ -262,7 +263,6 @@ public class ExcelService {
 		LOGGER.info("Try to delete excel pgEstrazione: {}", pgEstrazione);
 		ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
         String path = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
-//        new File(path).delete();
 
         storageService.delete(path);
 
