@@ -64,7 +64,7 @@ public class PrintService {
 	private String serverURL;
 
 	@Autowired
-	private StorageService storageService;
+	private PrintStorageService storageService;
 	
 	private final CounterService counterService;
 	public static final String TIMES_NEW_ROMAN = "Times New Roman";
