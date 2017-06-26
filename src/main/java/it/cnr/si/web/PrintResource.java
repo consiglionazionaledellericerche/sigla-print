@@ -5,7 +5,7 @@ import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
-import it.cnr.si.service.StorageService;
+import it.cnr.si.service.PrintStorageService;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +42,7 @@ public class PrintResource {
     private CacheService cacheService;
 
     @Autowired
-    private StorageService storageService;
+    private PrintStorageService storageService;
 
     @Value("${file.separator}")
 	private String fileSeparator;

@@ -41,7 +41,7 @@ public class ExcelService {
 	private String serverURL;
 
 	@Autowired
-	private StorageService storageService;
+	private PrintStorageService storageService;
 
 	@Autowired
 	private ExcelRepository excelRepository;
