@@ -102,7 +102,6 @@ public class PrintResource {
                 name);
         String path = Arrays.asList(user, file).stream().collect(Collectors.joining(fileSeparator));
 
-//        File fileXLS = new File(path);
         try {
         	if (command != null && command.equalsIgnoreCase("delete")) {
         	    storageService.delete(path);

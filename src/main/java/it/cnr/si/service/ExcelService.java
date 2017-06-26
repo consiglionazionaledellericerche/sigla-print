@@ -7,7 +7,7 @@ import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.OptimisticLockException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -142,16 +144,18 @@ public class ExcelService {
 			}
 			List<String> strings = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName());
 			String collect = strings.stream().collect(Collectors.joining(fileSeparator));
-			File output = new File(collect);
-
-
-			wb.write(FileUtils.openOutputStream(output, true));// assegno lo stream al FileOutputStream
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			wb.write(baos);
-
 			byte[] byteArray = baos.toByteArray();
+
 			storageService.write(collect, byteArray);
+
+			File output = File.createTempFile(collect, null);
+			FileWriter fileWriter = new FileWriter(output);
+			IOUtils.write(byteArray, fileWriter, Charset.defaultCharset());
+			fileWriter.flush();
+			fileWriter.close();
 
 			if (excelSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();

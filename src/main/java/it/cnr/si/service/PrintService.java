@@ -16,7 +16,7 @@ import net.sf.jasperreports.repo.InputStreamResource;
 import net.sf.jasperreports.repo.ReportResource;
 import net.sf.jasperreports.repo.RepositoryService;
 import net.sf.jasperreports.repo.Resource;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -159,13 +157,18 @@ public class PrintService {
 		try {
 			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
 
+
+
 			byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+			File output = File.createTempFile(collect, null);
+			FileWriter fileWriter = new FileWriter(output);
+			IOUtils.write(byteArray, fileWriter, Charset.defaultCharset());
+			fileWriter.flush();
+			fileWriter.close();
+
 			storageService.write(collect, byteArray);
 
-			//TODO: serve ?!?
-			File output = new File(collect);
-			FileUtils.writeByteArrayToFile(output, byteArray);
-			LOGGER.error("file output {} !!! - usare tmp file ?", collect);
 
 			PrintSpooler printSpooler = printRepository.findOne(pgStampa);
 	        if (printSpooler.getDtProssimaEsecuzione() != null){
