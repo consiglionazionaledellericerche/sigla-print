@@ -16,8 +16,6 @@ print:
   queue.priorita: 1,2,3
 
 cnr:
-  fs:
-    path: /tmp/stampe/
   gitlab:
     url: http://git.si.cnr.it/dev/sigla-reports/raw/master
     token: TyB9NvodV1sDyroHF4zQ
