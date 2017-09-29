@@ -14,7 +14,7 @@ public class Stampa_situazione_progettoScriptlet extends JRDefaultScriptlet {
 		java.sql.CallableStatement cs = null; 
 		try{
 			conn.setAutoCommit(false);
-			cs = conn.prepareCall("{call PRC_LOAD_SITUAZIONE_PROGETTI(?,?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call PRC_LOAD_SITUAZIONE_PROGETTI(?,?,?,?,?,?,?,?,?,?,?)}");
 			cs.setObject(1,(java.lang.Integer)getParameterValue("P_ESERCIZIO") );
 			cs.setObject(2,(java.lang.Integer)getParameterValue("P_PROGETTO"));
 			cs.setObject(3,(java.lang.String)getParameterValue("P_UO"));
@@ -25,6 +25,7 @@ public class Stampa_situazione_progettoScriptlet extends JRDefaultScriptlet {
 			cs.setObject(8,(java.lang.String)(((java.lang.Boolean)getParameterValue("P_PRINT_PIANO_ECO")).equals(Boolean.TRUE)?"S":"N"));
 			cs.setObject(9,(java.lang.String)(((java.lang.Boolean)getParameterValue("P_PRINT_SOLO_GAE_ATTIVE")).equals(Boolean.TRUE)?"S":"N"));
 			cs.setObject(10,(java.lang.String)(((java.lang.Boolean)getParameterValue("P_PRINT_MOVIMENTAZIONE")).equals(Boolean.TRUE)?"S":"N"));
+			cs.setObject(11,(java.lang.Integer)getParameterValue("P_RESPONSABILE_GAE"));
 			cs.executeQuery();
 		}catch (Throwable e) {
 			throw new JRScriptletException(e.getMessage());
