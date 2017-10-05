@@ -17,12 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.OptimisticLockException;
@@ -129,7 +124,12 @@ public class ExcelService {
 				for (ExcelSpoolerParam column : excelSpooler.getExcelSpoolerParams()) {
 					cellnum++;
 					c = r.createCell((short)cellnum);
-					String valoreRC = rs.getString(column.getColumnName());
+                    String valoreRC = rs.getString(
+                            Optional.ofNullable(column.getColumnName())
+                                    .filter(columnName -> columnName.indexOf(".") != -1)
+                                    .map(columnName -> columnName.substring(columnName.lastIndexOf(".") + 1))
+                                    .orElseGet(() -> column.getColumnName())
+                    );
 					String valoreStringa = column.getExcelSpoolerParamColumns().isEmpty()? valoreRC : valoreRC==null ? valoreRC:
 						(String)column.getParamColumns(valoreRC);
 					if(valoreStringa != null){
