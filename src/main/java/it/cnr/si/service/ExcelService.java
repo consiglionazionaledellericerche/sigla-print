@@ -127,7 +127,7 @@ public class ExcelService {
 					String valoreRC = rs.getString(
                             Optional.ofNullable(column.getColumnName())
                                 .filter(columnName -> columnName.indexOf(".") != -1)
-                                .map(columnName -> columnName.substring(columnName.lastIndexOf(".")))
+                                .map(columnName -> columnName.substring(columnName.lastIndexOf(".") + 1))
                                 .orElseGet(() -> column.getColumnName())
 					);
 					String valoreStringa = column.getExcelSpoolerParamColumns().isEmpty()? valoreRC : valoreRC==null ? valoreRC:
