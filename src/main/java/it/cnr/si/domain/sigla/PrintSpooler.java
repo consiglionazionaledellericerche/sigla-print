@@ -482,7 +482,6 @@ public class PrintSpooler {
 			}
 			parameters.put(printSpoolerParam.getKey().getNomeParam(), valoreParametro);
 		}
-		parameters.put("DIR_IMAGE", "/img/");        
 		parameters.put("DIR_SUBREPORT", getPath());
 		parameters.put("SUBREPORT_DIR", getPath());
 		return parameters;

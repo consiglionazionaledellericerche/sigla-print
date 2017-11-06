@@ -39,3 +39,5 @@ spring.datasource:
   username: PCIR009
   password: dbform
   driverClassName: oracle.jdbc.OracleDriver
+
+dir.image: /img/
