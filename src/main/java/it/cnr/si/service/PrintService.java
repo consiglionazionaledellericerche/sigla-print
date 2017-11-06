@@ -67,7 +67,10 @@ public class PrintService {
 
 	@Value("${print.server.url}")
 	private String serverURL;
-	
+
+    @Value("${dir.image}")
+    private String dirImage;
+
 	private final CounterService counterService;
 	public static final String TIMES_NEW_ROMAN = "Times New Roman";
 
@@ -108,15 +111,18 @@ public class PrintService {
 			conn = databaseConfiguration.connection();
 
 			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
+            HashMap<String, Object> parameters = printSpooler.getParameters();
+            parameters.put("DIR_IMAGE", dirImage);
 
-
-			defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
+            defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.font.name", TIMES_NEW_ROMAN);
 
 			JasperReportsContext jasperReportsContext = new CacheAwareJasperReportsContext(defaultJasperReportsContext);
 			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-			return jasperFillManager.fill(jasperReport, printSpooler.getParameters(), conn);
+			return jasperFillManager.fill(jasperReport,
+                    parameters,
+					conn);
 
 
 		} catch (JRRuntimeException | SQLException | JRException e) {
