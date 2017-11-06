@@ -12,3 +12,6 @@ services:
     - LANG=it_IT.UTF-8
     - LANGUAGE=it_IT:it
     - LC_ALL=it_IT.UTF-8
+    - 'SPRING_DATASOURCE_URL=jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAT'
+    - 'SPRING_DATASOURCE_PASSWORD=dbtest'
+    - 'DIR_IMAGE=/img/ISS'
