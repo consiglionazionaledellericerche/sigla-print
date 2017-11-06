@@ -7,7 +7,7 @@ services:
     mem_limit: 1g
     network_mode: bridge
     labels:
-    - SERVICE_NAME=##{SERVICE_NAME}##
+      SERVICE_NAME: "##{SERVICE_NAME}##"
     environment:
     - LANG=it_IT.UTF-8
     - LANGUAGE=it_IT:it
