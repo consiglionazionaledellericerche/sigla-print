@@ -1,4 +1,4 @@
-# DOCKER-VERSION 1.12
+# DOCKER-VERSION 17.10.0-ce
 FROM anapsix/alpine-java:jdk8
 MAINTAINER Francesco Uliana <francesco.uliana@cnr.it>
 
