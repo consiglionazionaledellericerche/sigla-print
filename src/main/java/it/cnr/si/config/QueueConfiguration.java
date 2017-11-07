@@ -7,6 +7,7 @@ import it.cnr.si.service.ExcelService;
 import it.cnr.si.service.PrintService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jasperreports.engine.JasperPrint;
@@ -58,7 +59,11 @@ public class QueueConfiguration implements InitializingBean{
             public void itemAdded(ItemEvent<String> itemEvent) {
             	String priorita = itemEvent.getItem();
                 LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
-                boolean removed = queuePrintApplication(priorita).remove(priorita);
+                boolean removed =
+						Optional.ofNullable(queuePrintApplication(priorita))
+								.filter(strings -> !strings.isEmpty())
+								.map(strings -> strings.remove(priorita))
+							.orElse(true);
                 LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
                     LOGGER.trace("PrintApplicationListener consuming {}", priorita);
