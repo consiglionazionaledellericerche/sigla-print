@@ -59,11 +59,7 @@ public class QueueConfiguration implements InitializingBean{
             public void itemAdded(ItemEvent<String> itemEvent) {
             	String priorita = itemEvent.getItem();
                 LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
-                boolean removed =
-						Optional.ofNullable(queuePrintApplication(priorita))
-								.filter(strings -> !strings.isEmpty())
-								.map(strings -> strings.remove(priorita))
-							.orElse(true);
+                boolean removed = queuePrintApplication(priorita).remove(priorita);
                 LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
                 if (removed) {
                     LOGGER.trace("PrintApplicationListener consuming {}", priorita);
@@ -92,7 +88,7 @@ public class QueueConfiguration implements InitializingBean{
 								LOGGER.info("unable to get lock {}", lockKey);				
 							}
 						} catch (InterruptedException e) {
-							//Nothing to do
+							LOGGER.info("InterruptedException to get lock {}", lockKey);
 						}
                 	}
                     LOGGER.trace("PrintApplicationListener consumed {}", priorita);
