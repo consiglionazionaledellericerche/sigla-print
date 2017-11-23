@@ -40,7 +40,7 @@ public class PrintConfiguration {
     public void printScheduler() {
         LOGGER.debug("Start scheduler at {}", ZonedDateTime.now());
     	for (String priorita : queuePriorita) {
-    		queueConfiguration.queuePrintApplication(priorita).add(priorita);
+    		queueConfiguration.queuePrint(priorita);
 		}
         Optional.ofNullable(excelService.print()).map(map -> queueConfiguration.executeExcel(map));    	
     }
