@@ -47,60 +47,72 @@ public class QueueConfiguration implements InitializingBean{
 
     @Autowired
     private CacheService cacheService;
-    
-    public IQueue<String> queuePrintApplication(String priorita) {
+
+    class PrintApplicationListener implements ItemListener<Long>{
+		private final String priorita;
+
+		public PrintApplicationListener(String priorita) {
+			this.priorita = priorita;
+		}
+
+		@Override
+		public void itemAdded(ItemEvent<Long> itemEvent) {
+			Long pgStampa = itemEvent.getItem();
+			LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
+			boolean removed = queuePrintApplication(priorita).remove(pgStampa);
+			LOGGER.trace("PrintApplicationListener {} {}", pgStampa, removed ? "removed" : "not removed");
+			if (removed) {
+				LOGGER.trace("PrintApplicationListener consuming {}", priorita);
+				PrintSpooler print = null;
+				if (pgStampa != null) {
+					String lockKey = PDF.concat(String.valueOf(pgStampa));
+					ILock lock = hazelcastInstance.getLock(lockKey);
+					LOGGER.info("try lock {}", lockKey);
+					try {
+						if (lock.tryLock ( 1, TimeUnit.SECONDS ) ) {
+							try {
+								print = printService.print(pgStampa);
+								JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
+								printService.executeReport(jasperPrint, print.getPgStampa(),
+										print.getName(),
+										print.getUtcr());
+							} catch (Exception _ex) {
+								if (print != null)
+									printService.error(print, _ex);
+							} finally {
+								LOGGER.info("unlocking {}", lockKey);
+								lock.unlock();
+							}
+						} else {
+							LOGGER.info("unable to get lock {}", lockKey);
+						}
+					} catch (InterruptedException e) {
+						LOGGER.info("InterruptedException to get lock {}", lockKey);
+					}
+				}
+				LOGGER.trace("PrintApplicationListener consumed {}", priorita);
+			}
+		}
+
+		@Override
+		public void itemRemoved(ItemEvent<Long> itemEvent) {
+			LOGGER.info("PrintApplicationListener removed {}", itemEvent.getItem());
+		}
+	}
+
+    public IQueue<Long> queuePrintApplication(String priorita) {
         return hazelcastInstance.getQueue(SIGLA_PRIORITA.concat(priorita));
     }
-    
+
+    public void queuePrint(String priorita) {
+        Optional.ofNullable(printService.print(Integer.valueOf(priorita)))
+                .ifPresent(pgStampa -> queuePrintApplication(priorita).add(pgStampa));
+    }
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		ItemListener<String> printApplicationListener = new ItemListener<String>() {
-            @Override
-            public void itemAdded(ItemEvent<String> itemEvent) {
-            	String priorita = itemEvent.getItem();
-                LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
-                boolean removed = queuePrintApplication(priorita).remove(priorita);
-                LOGGER.trace("PrintApplicationListener {} {}", priorita, removed ? "removed" : "not removed");
-                if (removed) {
-                    LOGGER.trace("PrintApplicationListener consuming {}", priorita);
-                    Long pgStampa = printService.print(Integer.valueOf(priorita));
-                    PrintSpooler print = null;
-                    if (pgStampa != null) {                    	
-                    	String lockKey = PDF.concat(String.valueOf(pgStampa));
-                    	ILock lock = hazelcastInstance.getLock(lockKey);
-                    	LOGGER.info("try lock {}", lockKey);	
-                    	try {
-							if (lock.tryLock ( 1, TimeUnit.SECONDS ) ) {  
-								try {
-							    		print = printService.print(pgStampa);
-							    		JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
-							        	printService.executeReport(jasperPrint, print.getPgStampa(), 
-							        			print.getName(), 
-							        			print.getUtcr());
-								} catch (Exception _ex) {
-									if (print != null)
-										printService.error(print, _ex);
-								} finally {
-							        LOGGER.info("unlocking {}", lockKey);
-									lock.unlock();                    		
-								}
-							} else {
-								LOGGER.info("unable to get lock {}", lockKey);				
-							}
-						} catch (InterruptedException e) {
-							LOGGER.info("InterruptedException to get lock {}", lockKey);
-						}
-                	}
-                    LOGGER.trace("PrintApplicationListener consumed {}", priorita);
-                }
-            }
-            @Override
-            public void itemRemoved(ItemEvent<String> itemEvent) {
-                LOGGER.trace("PrintApplicationListener removed {}", itemEvent.getItem());
-            }
-        };
         for (String priorita : queuePriorita) {
-            queuePrintApplication(priorita).addItemListener(printApplicationListener, true);			
+            queuePrintApplication(priorita).addItemListener(new PrintApplicationListener(priorita), true);
 		}		
 	}
 	public Long executeExcel(ExcelSpooler excelSpooler) {
