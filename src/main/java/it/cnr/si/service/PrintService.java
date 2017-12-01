@@ -158,10 +158,17 @@ public class PrintService {
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public PrintSpooler print(Long pgStampa) {
 		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
-		printSpooler.setStato(PrintState.X);
-		printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-		printRepository.save(printSpooler);
-		return printSpooler;				
+		if (printSpooler.canExecute()) {
+			printSpooler.setStato(PrintState.X);
+			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+			printRepository.save(printSpooler);
+			return printSpooler;
+		} else {
+            LOGGER.warn("Cannot execute report {} width stato {} and data prossima esecuzione {}",
+                    pgStampa, printSpooler.getStato(), printSpooler.getDtProssimaEsecuzione());
+			return null;
+		}
+
 	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)	
