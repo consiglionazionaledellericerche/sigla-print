@@ -7,6 +7,8 @@ import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
+import org.apache.commons.io.IOUtils;
+import org.apache.poi.hssf.usermodel.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,13 +25,6 @@ import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +33,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.OptimisticLockException;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.sql.*;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.Date;
+import java.util.stream.Collectors;
+
 @Service
 public class ExcelService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExcelService.class);	
@@ -45,11 +53,12 @@ public class ExcelService {
 	
 	@Value("${file.separator}")
 	private String fileSeparator;	
-	@Value("${print.output.dir}")
-	private String printOutputDir;
 	@Value("${print.server.url}")
 	private String serverURL;
-	
+
+	@Autowired
+	private PrintStorageService storageService;
+
 	@Autowired
 	private ExcelRepository excelRepository;
 	@Autowired
@@ -154,9 +163,22 @@ public class ExcelService {
 					}  
 				}
 			}
-			File output = new File(Arrays.asList(printOutputDir,excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator)));
-			wb.write(FileUtils.openOutputStream(output, true));// assegno lo stream al FileOutputStream
-	        if (excelSpooler.getDtProssimaEsecuzione() != null){
+			List<String> strings = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName());
+			String collect = strings.stream().collect(Collectors.joining(fileSeparator));
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			wb.write(baos);
+			byte[] byteArray = baos.toByteArray();
+
+			storageService.write(collect, byteArray);
+
+			File output = File.createTempFile(collect, null);
+			FileWriter fileWriter = new FileWriter(output);
+			IOUtils.write(byteArray, fileWriter, Charset.defaultCharset());
+			fileWriter.flush();
+			fileWriter.close();
+
+			if (excelSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
                 data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
                 int addType = Calendar.DATE;
@@ -265,8 +287,10 @@ public class ExcelService {
 	public void deleteXls(Long pgEstrazione) {
 		LOGGER.info("Try to delete excel pgEstrazione: {}", pgEstrazione);
 		ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
-        String path = Arrays.asList(printOutputDir, excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
-        new File(path).delete();		
+        String path = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+
+        storageService.delete(path);
+
         excelRepository.delete(excelSpooler);
 	}
 	

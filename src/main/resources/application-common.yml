@@ -16,15 +16,14 @@ print:
   queue.priorita: 1,2,3
   max.page.size: 1000
 
-cnr.gitlab:
-  url: http://git.si.cnr.it/dev/sigla-reports/raw/master
-  token: TyB9NvodV1sDyroHF4zQ
-
-ajp:
-  port: 8009
-  timeout: 120000
-
-cache.hazelcast.packages: it.cnr
+cnr:
+  gitlab:
+    url: http://git.si.cnr.it/dev/sigla-reports/raw/master
+    token: TyB9NvodV1sDyroHF4zQ
+  ajp:
+    port: 8009
+    timeout: 120000
+  cache.hazelcast.packages: it.cnr
 
 logging.config: classpath:logback-local.xml
 
