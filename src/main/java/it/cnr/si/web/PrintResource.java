@@ -5,6 +5,7 @@ import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
+import it.cnr.si.service.PrintStorageService;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -41,8 +41,8 @@ public class PrintResource {
     @Autowired
     private CacheService cacheService;
 
-    @Value("${print.output.dir}")
-	private String printOutputDir;
+    @Autowired
+    private PrintStorageService storageService;
 
     @Value("${file.separator}")
 	private String fileSeparator;
@@ -72,9 +72,11 @@ public class PrintResource {
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
         headers.add("content-disposition", "inline;filename=" +
                 name);
-        String path = Arrays.asList(printOutputDir, user, name).stream().collect(Collectors.joining(fileSeparator));
+        String path = Arrays.asList(user, name).stream().collect(Collectors.joining(fileSeparator));
         try {
-			return new ResponseEntity<>(IOUtils.toByteArray(new FileInputStream(new File(path))),
+
+            InputStream inputStream = storageService.get(path);
+			return new ResponseEntity<>(IOUtils.toByteArray(inputStream),
 			        headers, HttpStatus.OK);
 		} catch (IOException e) {
 			LOGGER.error("Cannot find file: {}", path, e);
@@ -87,8 +89,8 @@ public class PrintResource {
     public ResponseEntity<byte[]> deletepdf(@PathVariable String user, @PathVariable String name) {
         LOGGER.info("delete report from user: {} and name: {}", user, name);
 
-        String path = Arrays.asList(printOutputDir, user, name).stream().collect(Collectors.joining(fileSeparator));
-        new File(path).delete();
+        String path = Arrays.asList(user, name).stream().collect(Collectors.joining(fileSeparator));
+        storageService.delete(path);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     
@@ -100,14 +102,17 @@ public class PrintResource {
         headers.setContentType(MediaType.parseMediaType("application/xls"));
         headers.add("content-disposition", "inline;filename=" +
                 name);
-        String path = Arrays.asList(printOutputDir, user, file).stream().collect(Collectors.joining(fileSeparator));
-        File fileXLS = new File(path);
+        String path = Arrays.asList(user, file).stream().collect(Collectors.joining(fileSeparator));
+
         try {
         	if (command != null && command.equalsIgnoreCase("delete")) {
-        		fileXLS.delete();
+        	    storageService.delete(path);
         		return new ResponseEntity<>(HttpStatus.OK);
         	} else {
-    			return new ResponseEntity<>(IOUtils.toByteArray(new FileInputStream(fileXLS)),
+
+                InputStream inputStream = storageService.get(path);
+
+    			return new ResponseEntity<>(IOUtils.toByteArray(inputStream),
     			        headers, HttpStatus.OK);        		
         	}
 		} catch (IOException e) {

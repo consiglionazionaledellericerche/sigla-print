@@ -17,7 +17,7 @@ import net.sf.jasperreports.repo.InputStreamResource;
 import net.sf.jasperreports.repo.ReportResource;
 import net.sf.jasperreports.repo.RepositoryService;
 import net.sf.jasperreports.repo.Resource;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -64,11 +62,11 @@ public class PrintService {
 	@Value("${file.separator}")
 	private String fileSeparator;
 
-	@Value("${print.output.dir}")
-	private String printOutputDir;
-
 	@Value("${print.server.url}")
 	private String serverURL;
+
+	@Autowired
+	private PrintStorageService storageService;
 
     @Value("${dir.image}")
     private String dirImage;
@@ -184,8 +182,21 @@ public class PrintService {
 	public Long executeReport(JasperPrint jasperPrint, Long pgStampa, String name, String userName) {
 		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
 		try {
-			File output = new File(Arrays.asList(printOutputDir,userName, name).stream().collect(Collectors.joining(fileSeparator)));
-			FileUtils.writeByteArrayToFile(output, byteArrayOutputStream.toByteArray());
+			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
+
+
+
+			byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+			File output = File.createTempFile(collect, null);
+			FileWriter fileWriter = new FileWriter(output);
+			IOUtils.write(byteArray, fileWriter, Charset.defaultCharset());
+			fileWriter.flush();
+			fileWriter.close();
+
+			storageService.write(collect, byteArray);
+
+
 			PrintSpooler printSpooler = printRepository.findOne(pgStampa);
 	        if (printSpooler.getDtProssimaEsecuzione() != null){
                 GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
@@ -244,8 +255,8 @@ public class PrintService {
 	public void deleteReport(Long pgStampa) {
 		LOGGER.info("Try to delete report pgStampa: {}", pgStampa);
 		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
-        String path = Arrays.asList(printOutputDir, printSpooler.getUtcr(), printSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
-        new File(path).delete();		
+        String path = Arrays.asList(printSpooler.getUtcr(), printSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+        storageService.delete(path);
 		printRepository.delete(printSpooler);
 	}
 	public void deleteReport() {

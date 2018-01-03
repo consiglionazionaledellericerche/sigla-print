@@ -2,3 +2,7 @@ logging.config: classpath:logback-test.xml
 
 print:
   scheduler: 500000
+
+cnr:
+  fs:
+    path: /tmp/stampe/
