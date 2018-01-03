@@ -8,6 +8,7 @@ import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.CounterService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,13 +67,27 @@ public class PrintService {
 
 	@Autowired
 	private PrintStorageService storageService;
-	
-	private final CounterService counterService;
+
+    @Value("${dir.image}")
+    private String dirImage;
+
+    @Value("${java.io.tmpdir}")
+    private String tempDir;
+
+    @Value("${print.max.page.size}")
+    private Integer maxPageSize;
+
+    private final CounterService counterService;
 	public static final String TIMES_NEW_ROMAN = "Times New Roman";
 
 	@Autowired
 	public PrintService(CounterService counterService) {
 		this.counterService = counterService;
+	}
+
+	@Bean
+	JRFileVirtualizer fileVirtualizer() {
+		return new JRFileVirtualizer(maxPageSize, tempDir);
 	}
 
 	public ByteArrayOutputStream print(JasperPrint print) {
@@ -106,15 +122,19 @@ public class PrintService {
 			conn = databaseConfiguration.connection();
 
 			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
+            HashMap<String, Object> parameters = printSpooler.getParameters();
+            parameters.put("DIR_IMAGE", dirImage);
+            parameters.put(JRParameter.REPORT_VIRTUALIZER, fileVirtualizer());
 
-
-			defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
+            defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.font.name", TIMES_NEW_ROMAN);
 
 			JasperReportsContext jasperReportsContext = new CacheAwareJasperReportsContext(defaultJasperReportsContext);
 			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-			return jasperFillManager.fill(jasperReport, printSpooler.getParameters(), conn);
+			return jasperFillManager.fill(jasperReport,
+                    parameters,
+					conn);
 
 
 		} catch (JRRuntimeException | SQLException | JRException e) {
@@ -136,10 +156,17 @@ public class PrintService {
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public PrintSpooler print(Long pgStampa) {
 		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
-		printSpooler.setStato(PrintState.X);
-		printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-		printRepository.save(printSpooler);
-		return printSpooler;				
+		if (printSpooler.canExecute()) {
+			printSpooler.setStato(PrintState.X);
+			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+			printRepository.save(printSpooler);
+			return printSpooler;
+		} else {
+            LOGGER.warn("Cannot execute report {} width stato {} and data prossima esecuzione {}",
+                    pgStampa, printSpooler.getStato(), printSpooler.getDtProssimaEsecuzione());
+			return null;
+		}
+
 	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)	

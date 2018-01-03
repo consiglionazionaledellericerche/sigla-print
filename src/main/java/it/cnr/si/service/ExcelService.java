@@ -9,6 +9,22 @@ import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.persistence.OptimisticLockException;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,7 +133,12 @@ public class ExcelService {
 				for (ExcelSpoolerParam column : excelSpooler.getExcelSpoolerParams()) {
 					cellnum++;
 					c = r.createCell((short)cellnum);
-					String valoreRC = rs.getString(column.getColumnName());
+                    String valoreRC = rs.getString(
+                            Optional.ofNullable(column.getColumnName())
+                                    .filter(columnName -> columnName.indexOf(".") != -1)
+                                    .map(columnName -> columnName.substring(columnName.lastIndexOf(".") + 1))
+                                    .orElseGet(() -> column.getColumnName())
+                    );
 					String valoreStringa = column.getExcelSpoolerParamColumns().isEmpty()? valoreRC : valoreRC==null ? valoreRC:
 						(String)column.getParamColumns(valoreRC);
 					if(valoreStringa != null){
