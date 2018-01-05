@@ -13,6 +13,8 @@ import org.apache.poi.hssf.usermodel.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +29,7 @@ import javax.persistence.OptimisticLockException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,7 +50,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
-public class ExcelService {
+public class ExcelService implements InitializingBean {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExcelService.class);	
 	Integer MAX_RIGHE_FOGLIO = new Integer(65530);
 	
@@ -299,5 +302,21 @@ public class ExcelService {
     	for (Long pgEstrazione : findXlsToDelete) {
     		deleteXls(pgEstrazione);
 		}		
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		serverURL = Optional.ofNullable(serverURL)
+				.filter(s -> s.equalsIgnoreCase("http://localhost:8080"))
+				.map(s -> {
+					try {
+						final String hostAddress = InetAddress.getLocalHost().getHostName();
+						return "http://".concat(hostAddress).concat(":8080");
+					} catch (UnknownHostException e) {
+						return s;
+					}
+				})
+				.orElse(serverURL);
+		LOGGER.info("Server URL: {}", serverURL);
 	}
 }
