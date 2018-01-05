@@ -275,7 +275,7 @@ public class PrintService implements InitializingBean{
 				.filter(s -> s.equalsIgnoreCase("http://localhost:8080"))
 				.map(s -> {
 					try {
-						final String hostAddress = InetAddress.getLocalHost().getHostName();
+						final String hostAddress = InetAddress.getLocalHost().getHostAddress();
 						return "http://".concat(hostAddress).concat(":8080");
 					} catch (UnknownHostException e) {
 						return s;
