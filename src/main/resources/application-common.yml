@@ -23,8 +23,6 @@ cnr:
   ajp:
     port: 8009
     timeout: 120000
-  fs:
-    path: /tmp/
   cache.hazelcast.packages: it.cnr
 
 logging.config: classpath:logback-local.xml
