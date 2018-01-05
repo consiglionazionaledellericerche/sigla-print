@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.metrics.CounterService;
@@ -30,6 +31,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -43,7 +46,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class PrintService {
+public class PrintService implements InitializingBean{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrintService.class);
 
@@ -266,6 +269,21 @@ public class PrintService {
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		serverURL = Optional.ofNullable(serverURL)
+				.filter(s -> s.equalsIgnoreCase("http://localhost:8080"))
+				.map(s -> {
+					try {
+						final String hostAddress = InetAddress.getLocalHost().getHostName();
+						return "http://".concat(hostAddress).concat(":8080");
+					} catch (UnknownHostException e) {
+						return s;
+					}
+				})
+				.orElse(serverURL);
+		LOGGER.info("Server URL: {}", serverURL);
+	}
 
 
 	class CacheAwareJasperReportsContext implements JasperReportsContext {
