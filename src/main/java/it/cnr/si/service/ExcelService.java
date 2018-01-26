@@ -75,10 +75,16 @@ public class ExcelService implements InitializingBean {
 		if (pgEstrazione != null) {
 			try {
 				ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
-				excelSpooler.setStato(PrintState.X.name());
-				excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
-				excelRepository.save(excelSpooler);
-				return excelSpooler;
+				if (excelSpooler.canExecute()) {
+					excelSpooler.setStato(PrintState.X.name());
+					excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+					excelRepository.save(excelSpooler);
+					return excelSpooler;
+				} else {
+					LOGGER.warn("Cannot execute excel {} width stato {} and data prossima esecuzione {}",
+							pgEstrazione, excelSpooler.getStato(), excelSpooler.getDtProssimaEsecuzione());
+					return null;
+				}
 			} catch (OptimisticLockException _ex) {
 				LOGGER.warn("Cannot obtain lock pgEstrazione: {}", pgEstrazione, _ex);
 			}			
