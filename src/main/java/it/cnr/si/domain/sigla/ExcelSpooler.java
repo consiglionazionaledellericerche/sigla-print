@@ -46,11 +46,9 @@ public class ExcelSpooler implements Serializable {
 	@Column(name="DS_ESTRAZIONE")
 	private String dsEstrazione;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name="DT_PARTENZA")
-	private Date dtPartenza;
+	private Timestamp dtPartenza;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name="DT_PROSSIMA_ESECUZIONE")
 	private Timestamp dtProssimaEsecuzione;
 
@@ -135,11 +133,11 @@ public class ExcelSpooler implements Serializable {
 		this.dsEstrazione = dsEstrazione;
 	}
 
-	public Date getDtPartenza() {
+	public Timestamp getDtPartenza() {
 		return this.dtPartenza;
 	}
 
-	public void setDtPartenza(Date dtPartenza) {
+	public void setDtPartenza(Timestamp dtPartenza) {
 		this.dtPartenza = dtPartenza;
 	}
 
