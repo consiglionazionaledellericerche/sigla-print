@@ -77,7 +77,7 @@ public class ExcelService implements InitializingBean {
 				ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
 				if (excelSpooler.canExecute()) {
 					excelSpooler.setStato(PrintState.X);
-					excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+					excelSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
 					excelRepository.save(excelSpooler);
 					return excelSpooler;
 				} else {
@@ -203,7 +203,7 @@ public class ExcelService implements InitializingBean {
 			excelSpooler.setStato(PrintState.S);
 			excelSpooler.setServer(serverURL.concat("/api/v1/get/excel"));
 			excelSpooler.setNomeFile(excelSpooler.getName());
-			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+			excelSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
 			excelRepository.save(excelSpooler);
             if (excelSpooler.getFlEmail()){
             	try {
@@ -237,7 +237,7 @@ public class ExcelService implements InitializingBean {
 		} catch (SQLException | IOException e) {
 			LOGGER.error("Error executing report pgStampa: {}", excelSpooler.getPgEstrazione(), e);
 			excelSpooler.setStato(PrintState.E);
-			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+			excelSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
 			excelSpooler.setErrore(e.getMessage());
 			excelRepository.save(excelSpooler);			
 		}finally {
