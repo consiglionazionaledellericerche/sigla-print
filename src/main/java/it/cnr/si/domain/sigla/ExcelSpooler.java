@@ -27,7 +27,7 @@ public class ExcelSpooler implements Serializable {
 	@Column(name="PG_ESTRAZIONE")
 	private long pgEstrazione;
 
-	@Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Timestamp dacr;
 
 	@Column(name="DS_ESTRAZIONE")
@@ -39,7 +39,7 @@ public class ExcelSpooler implements Serializable {
 	@Column(name="DT_PROSSIMA_ESECUZIONE")
 	private Timestamp dtProssimaEsecuzione;
 
-	@Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Timestamp duva;
 
 	@Column(name="EMAIL_A")
