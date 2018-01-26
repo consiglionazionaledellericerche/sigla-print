@@ -8,20 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 
 /**
@@ -91,7 +78,8 @@ public class ExcelSpooler implements Serializable {
 	@Column(name="SHEET_NAME")
 	private String sheetName;
 
-	private String stato;
+	@Enumerated(EnumType.STRING)
+	private PrintState stato;
 
 	@Column(name="TI_INTERVALLO")
 	private String tiIntervallo;
@@ -261,11 +249,11 @@ public class ExcelSpooler implements Serializable {
 		this.sheetName = sheetName;
 	}
 
-	public String getStato() {
+	public PrintState getStato() {
 		return this.stato;
 	}
 
-	public void setStato(String stato) {
+	public void setStato(PrintState stato) {
 		this.stato = stato;
 	}
 
