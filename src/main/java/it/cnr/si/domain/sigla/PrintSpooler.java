@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -171,13 +172,13 @@ public class PrintSpooler {
     private TipoIntervallo tiIntervallo;
 
     @Column(name = "dacr", nullable = false)
-    private Date dacr;
+    private Timestamp dacr;
 
     @Column(name = "utcr", nullable = false)
     private String utcr;
 
     @Column(name = "duva", nullable = false)
-    private Date duva;
+    private Timestamp duva;
 
     @Column(name = "utuv", nullable = false)
     private String utuv;
@@ -403,11 +404,11 @@ public class PrintSpooler {
     }
 
 
-    public Date getDacr() {
+    public Timestamp getDacr() {
         return dacr;
     }
 
-    public void setDacr(Date dacr) {
+    public void setDacr(Timestamp dacr) {
         this.dacr = dacr;
     }
 
@@ -419,11 +420,11 @@ public class PrintSpooler {
         this.utcr = utcr;
     }
 
-    public Date getDuva() {
+    public Timestamp getDuva() {
         return duva;
     }
 
-    public void setDuva(Date duva) {
+    public void setDuva(Timestamp duva) {
         this.duva = duva;
     }
 

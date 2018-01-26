@@ -161,7 +161,7 @@ public class PrintService implements InitializingBean{
 		PrintSpooler printSpooler = printRepository.findOne(pgStampa);
 		if (printSpooler.canExecute()) {
 			printSpooler.setStato(PrintState.X);
-			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+			printSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
 			printRepository.save(printSpooler);
 			return printSpooler;
 		} else {
@@ -176,7 +176,7 @@ public class PrintService implements InitializingBean{
 	public void error(PrintSpooler printSpooler, Exception _ex) {
 		LOGGER.error("Error executing report with pgStampa: {}", printSpooler.getPgStampa(), _ex);
 		printSpooler.setStato(PrintState.E);
-		printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+		printSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
 		printSpooler.setErrore(Optional.ofNullable(_ex.getCause()).map(Throwable::getMessage).orElse(_ex.getMessage()));
 		printRepository.save(printSpooler);			
 	}
@@ -216,7 +216,7 @@ public class PrintService implements InitializingBean{
 	        }			
 			printSpooler.setStato(PrintState.S);
 			printSpooler.setServer(serverURL.concat("/api/v1/get/print"));
-			printSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
+			printSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
 			printSpooler.setNomeFile(name);
 			printRepository.save(printSpooler);
             if (printSpooler.getFlEmail()){

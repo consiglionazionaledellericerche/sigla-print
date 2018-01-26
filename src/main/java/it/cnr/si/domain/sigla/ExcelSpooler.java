@@ -28,7 +28,7 @@ public class ExcelSpooler implements Serializable {
 	private long pgEstrazione;
 
 	@Temporal(TemporalType.DATE)
-	private Date dacr;
+	private Timestamp dacr;
 
 	@Column(name="DS_ESTRAZIONE")
 	private String dsEstrazione;
@@ -40,7 +40,7 @@ public class ExcelSpooler implements Serializable {
 	private Timestamp dtProssimaEsecuzione;
 
 	@Temporal(TemporalType.DATE)
-	private Date duva;
+	private Timestamp duva;
 
 	@Column(name="EMAIL_A")
 	private String emailA;
@@ -105,11 +105,11 @@ public class ExcelSpooler implements Serializable {
 		this.pgEstrazione = pgEstrazione;
 	}
 
-	public Date getDacr() {
+	public Timestamp getDacr() {
 		return this.dacr;
 	}
 
-	public void setDacr(Date dacr) {
+	public void setDacr(Timestamp dacr) {
 		this.dacr = dacr;
 	}
 
@@ -137,11 +137,11 @@ public class ExcelSpooler implements Serializable {
 		this.dtProssimaEsecuzione = dtProssimaEsecuzione;
 	}
 
-	public Date getDuva() {
+	public Timestamp getDuva() {
 		return this.duva;
 	}
 
-	public void setDuva(Date duva) {
+	public void setDuva(Timestamp duva) {
 		this.duva = duva;
 	}
 
