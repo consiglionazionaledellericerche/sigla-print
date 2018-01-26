@@ -76,7 +76,7 @@ public class ExcelService implements InitializingBean {
 			try {
 				ExcelSpooler excelSpooler = excelRepository.findOne(pgEstrazione);
 				if (excelSpooler.canExecute()) {
-					excelSpooler.setStato(PrintState.X.name());
+					excelSpooler.setStato(PrintState.X);
 					excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 					excelRepository.save(excelSpooler);
 					return excelSpooler;
@@ -200,7 +200,7 @@ public class ExcelService implements InitializingBean {
                 data_da.add(addType, excelSpooler.getIntervallo());
                 excelSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));
 	        }			
-			excelSpooler.setStato(PrintState.S.name());
+			excelSpooler.setStato(PrintState.S);
 			excelSpooler.setServer(serverURL.concat("/api/v1/get/excel"));
 			excelSpooler.setNomeFile(excelSpooler.getName());
 			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
@@ -236,7 +236,7 @@ public class ExcelService implements InitializingBean {
             }
 		} catch (SQLException | IOException e) {
 			LOGGER.error("Error executing report pgStampa: {}", excelSpooler.getPgEstrazione(), e);
-			excelSpooler.setStato(PrintState.E.name());
+			excelSpooler.setStato(PrintState.E);
 			excelSpooler.setDuva(Date.from(ZonedDateTime.now().toInstant()));
 			excelSpooler.setErrore(e.getMessage());
 			excelRepository.save(excelSpooler);			
