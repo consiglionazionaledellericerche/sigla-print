@@ -2,6 +2,7 @@ package it.cnr.si.domain.sigla;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +52,7 @@ public class ExcelSpooler implements Serializable {
 
 	@Temporal(TemporalType.DATE)
 	@Column(name="DT_PROSSIMA_ESECUZIONE")
-	private Date dtProssimaEsecuzione;
+	private Timestamp dtProssimaEsecuzione;
 
 	@Temporal(TemporalType.DATE)
 	private Date duva;
@@ -142,11 +143,11 @@ public class ExcelSpooler implements Serializable {
 		this.dtPartenza = dtPartenza;
 	}
 
-	public Date getDtProssimaEsecuzione() {
+	public Timestamp getDtProssimaEsecuzione() {
 		return this.dtProssimaEsecuzione;
 	}
 
-	public void setDtProssimaEsecuzione(Date dtProssimaEsecuzione) {
+	public void setDtProssimaEsecuzione(Timestamp dtProssimaEsecuzione) {
 		this.dtProssimaEsecuzione = dtProssimaEsecuzione;
 	}
 
