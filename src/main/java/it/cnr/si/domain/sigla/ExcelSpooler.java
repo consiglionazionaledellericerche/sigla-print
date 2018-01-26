@@ -2,8 +2,10 @@ package it.cnr.si.domain.sigla;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -326,4 +328,13 @@ public class ExcelSpooler implements Serializable {
         return fileName;
 	}
 
+	public boolean canExecute() {
+		return Optional.ofNullable(getStato())
+				.map(printState ->
+						(printState.equals(PrintState.C) && getDtProssimaEsecuzione() == null) ||
+								((printState.equals(PrintState.C) || printState.equals(PrintState.S)) &&
+										getDtProssimaEsecuzione().toInstant().isBefore(Instant.now()))
+				).orElse(false);
+
+	}
 }
