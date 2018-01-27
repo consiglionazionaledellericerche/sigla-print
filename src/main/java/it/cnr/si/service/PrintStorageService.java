@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by francesco on 23/06/17.
@@ -24,12 +25,11 @@ public class PrintStorageService  {
         this.storageService = storageService;
     }
 
-    public void write(String id, byte[] byteArray) {
+    public CompletableFuture<Void> write(String id, byte[] byteArray) {
         LOGGER.info("writing {} bytes to {}", byteArray.length, id);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
-        storageService
-                .createAsync(inputStream, id)
-                .join();
+        return storageService
+                .createAsync(inputStream, id);
     }
 
     public boolean delete(String id) {

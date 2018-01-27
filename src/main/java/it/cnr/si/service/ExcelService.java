@@ -10,8 +10,7 @@ import it.cnr.si.repository.ExcelRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,9 +36,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.OptimisticLockException;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -179,61 +176,60 @@ public class ExcelService implements InitializingBean {
 			wb.write(baos);
 			byte[] byteArray = baos.toByteArray();
 
-			storageService.write(collect, byteArray);
+			storageService.write(collect, byteArray).thenAccept(aVoid -> {
+                if (excelSpooler.getDtProssimaEsecuzione() != null){
+                    GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
+                    data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
+                    int addType = Calendar.DATE;
+                    if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.G))
+                        addType = Calendar.DATE;
+                    else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.S))
+                        addType = Calendar.WEEK_OF_YEAR;
+                    else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.M))
+                        addType = Calendar.MONTH;
+                    data_da.add(addType, excelSpooler.getIntervallo());
+                    excelSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));
+                }
+                excelSpooler.setStato(PrintState.S);
+                excelSpooler.setServer(serverURL.concat("/api/v1/get/excel"));
+                excelSpooler.setNomeFile(excelSpooler.getName());
+                excelSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
+                excelRepository.save(excelSpooler);
+                if (excelSpooler.getFlEmail()){
+                    try {
+                        File output = File.createTempFile(collect, null);
+                        try (FileOutputStream out = new FileOutputStream(output)) {
+                            IOUtils.copy(storageService.get(collect), out);
+                        }
+                        StringBuffer bodyText = new StringBuffer(excelSpooler.getEmailBody()==null?"":excelSpooler.getEmailBody());
+                        bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
+                        bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
+                        bodyText.append("Qualsiasi suo utilizzo, comunicazione o diffusione non autorizzata e' proibita.<br>");
+                        bodyText.append("Qualora riceviate detta e-mail per errore, vogliate distruggerla.<br><br>");
+                        bodyText.append("<b>Attenzione: </b><br>");
+                        bodyText.append("Questa e' una e-mail generata automaticamente da un server non presidiato, La preghiamo di non rispondere. ");
+                        bodyText.append("Questa casella di posta elettronica non e' abilitata alla ricezione di messaggi.<br>");
+                        if (excelSpooler.getDtProssimaEsecuzione() != null){
+                            StringTokenizer indirizzi = new StringTokenizer(excelSpooler.getEmailA(),",");
+                            bodyText.append("Se non desidera piu' far parte della lista di distribuzione della stampa allegata clicchi ");
+                            while(indirizzi.hasMoreElements()){
+                                String indirizzo = (String)indirizzi.nextElement();
+                                String messaggio = "<a href=\"https://contab.cnr.it/SIGLA/cancellaSchedulazioneExcel.do?pg=pg"+
+                                        String.valueOf(excelSpooler.getPgEstrazione()).trim()+"&indirizzoEMail="+indirizzo+"\">qui</a> per cancellarsi.<br></body></html>";
+                                mailService.send(excelSpooler.getEmailSubject(), bodyText.toString().concat(messaggio), indirizzo,
+                                        excelSpooler.getEmailCc(), excelSpooler.getEmailCcn(), output, excelSpooler.getName());
+                            }
+                        }else{
+                            bodyText.append("</body></html>");
+                            mailService.send(excelSpooler.getEmailSubject(), bodyText.toString(), excelSpooler.getEmailA(),
+                                    excelSpooler.getEmailCc(), excelSpooler.getEmailCcn(), output, excelSpooler.getName());
+                        }
+                    } catch (Exception ex) {
+                        LOGGER.error("Error while sending email for report pgStampa: {}", excelSpooler.getPgEstrazione(), ex);
+                    }
+                }
+            });
 
-			File output = File.createTempFile(collect, null);
-			FileWriter fileWriter = new FileWriter(output);
-			IOUtils.write(byteArray, fileWriter, Charset.defaultCharset());
-			fileWriter.flush();
-			fileWriter.close();
-
-			if (excelSpooler.getDtProssimaEsecuzione() != null){
-                GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
-                data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
-                int addType = Calendar.DATE;
-                if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.G))
-                	addType = Calendar.DATE;
-                else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.S))
-                	addType = Calendar.WEEK_OF_YEAR;
-                else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.M))
-                	addType = Calendar.MONTH;
-                data_da.add(addType, excelSpooler.getIntervallo());
-                excelSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));
-	        }			
-			excelSpooler.setStato(PrintState.S);
-			excelSpooler.setServer(serverURL.concat("/api/v1/get/excel"));
-			excelSpooler.setNomeFile(excelSpooler.getName());
-			excelSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
-			excelRepository.save(excelSpooler);
-            if (excelSpooler.getFlEmail()){
-            	try {
-                	StringBuffer bodyText = new StringBuffer(excelSpooler.getEmailBody()==null?"":excelSpooler.getEmailBody());
-                	bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
-                	bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
-                	bodyText.append("Qualsiasi suo utilizzo, comunicazione o diffusione non autorizzata e' proibita.<br>");
-                	bodyText.append("Qualora riceviate detta e-mail per errore, vogliate distruggerla.<br><br>");
-                	bodyText.append("<b>Attenzione: </b><br>");
-                	bodyText.append("Questa e' una e-mail generata automaticamente da un server non presidiato, La preghiamo di non rispondere. ");
-                	bodyText.append("Questa casella di posta elettronica non e' abilitata alla ricezione di messaggi.<br>");
-                	if (excelSpooler.getDtProssimaEsecuzione() != null){
-                		StringTokenizer indirizzi = new StringTokenizer(excelSpooler.getEmailA(),",");
-            			bodyText.append("Se non desidera piu' far parte della lista di distribuzione della stampa allegata clicchi ");
-                		while(indirizzi.hasMoreElements()){
-                			String indirizzo = (String)indirizzi.nextElement();
-                			String messaggio = "<a href=\"https://contab.cnr.it/SIGLA/cancellaSchedulazioneExcel.do?pg=pg"+
-                					String.valueOf(excelSpooler.getPgEstrazione()).trim()+"&indirizzoEMail="+indirizzo+"\">qui</a> per cancellarsi.<br></body></html>";
-                			mailService.send(excelSpooler.getEmailSubject(), bodyText.toString().concat(messaggio), indirizzo, 
-                					excelSpooler.getEmailCc(), excelSpooler.getEmailCcn(), output, excelSpooler.getName());
-                		}
-                	}else{
-                    	bodyText.append("</body></html>");
-            			mailService.send(excelSpooler.getEmailSubject(), bodyText.toString(), excelSpooler.getEmailA(), 
-            					excelSpooler.getEmailCc(), excelSpooler.getEmailCcn(), output, excelSpooler.getName());
-                	}            		
-            	} catch (Exception ex) {
-            		LOGGER.error("Error while sending email for report pgStampa: {}", excelSpooler.getPgEstrazione(), ex);
-            	}
-            }
 		} catch (SQLException | IOException e) {
 			LOGGER.error("Error executing report pgStampa: {}", excelSpooler.getPgEstrazione(), e);
 			excelSpooler.setStato(PrintState.E);
