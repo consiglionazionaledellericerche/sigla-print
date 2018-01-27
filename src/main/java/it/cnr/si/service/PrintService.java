@@ -186,68 +186,64 @@ public class PrintService implements InitializingBean{
 		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
 		try {
 			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
-
-
-
 			byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-			File output = File.createTempFile(collect, null);
-			FileWriter fileWriter = new FileWriter(output);
-			IOUtils.write(byteArray, fileWriter, Charset.defaultCharset());
-			fileWriter.flush();
-			fileWriter.close();
+			storageService.write(collect, byteArray).thenAccept(aVoid -> {
 
-			storageService.write(collect, byteArray);
+				PrintSpooler printSpooler = printRepository.findOne(pgStampa);
+				if (printSpooler.getDtProssimaEsecuzione() != null){
+					GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
+					data_da.setTime(printSpooler.getDtProssimaEsecuzione());
+					int addType = Calendar.DATE;
+					if (printSpooler.getTiIntervallo().equals(TipoIntervallo.G))
+						addType = Calendar.DATE;
+					else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.S))
+						addType = Calendar.WEEK_OF_YEAR;
+					else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.M))
+						addType = Calendar.MONTH;
+					data_da.add(addType, printSpooler.getIntervallo());
+					printSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));
+				}
+				printSpooler.setStato(PrintState.S);
+				printSpooler.setServer(serverURL.concat("/api/v1/get/print"));
+				printSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
+				printSpooler.setNomeFile(name);
+				printRepository.save(printSpooler);
+				if (printSpooler.getFlEmail()){
+					try {
+						File output = File.createTempFile(collect, null);
+						try (FileOutputStream out = new FileOutputStream(output)) {
+							IOUtils.copy(storageService.get(collect), out);
+						}
+						StringBuffer bodyText = new StringBuffer(printSpooler.getEmailBody()==null?"":printSpooler.getEmailBody());
+						bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
+						bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
+						bodyText.append("Qualsiasi suo utilizzo, comunicazione o diffusione non autorizzata e' proibita.<br>");
+						bodyText.append("Qualora riceviate detta e-mail per errore, vogliate distruggerla.<br><br>");
+						bodyText.append("<b>Attenzione: </b><br>");
+						bodyText.append("Questa e' una e-mail generata automaticamente da un server non presidiato, La preghiamo di non rispondere. ");
+						bodyText.append("Questa casella di posta elettronica non e' abilitata alla ricezione di messaggi.<br>");
+						if (printSpooler.getDtProssimaEsecuzione() != null){
+							StringTokenizer indirizzi = new StringTokenizer(printSpooler.getEmailA(),",");
+							bodyText.append("Se non desidera piu' far parte della lista di distribuzione della stampa allegata clicchi ");
+							while(indirizzi.hasMoreElements()){
+								String indirizzo = (String)indirizzi.nextElement();
+								String messaggio = "<a href=\"https://contab.cnr.it/SIGLA/cancellaSchedulazione.do?pgStampa=pg"+
+										String.valueOf(printSpooler.getPgStampa()).trim()+"&indirizzoEMail="+indirizzo+"\">qui</a> per cancellarsi.<br></body></html>";
+								mailService.send(printSpooler.getEmailSubject(), bodyText.toString().concat(messaggio), indirizzo,
+										printSpooler.getEmailCc(), printSpooler.getEmailCcn(), output, name);
+							}
+						}else{
+							bodyText.append("</body></html>");
+							mailService.send(printSpooler.getEmailSubject(), bodyText.toString(), printSpooler.getEmailA(),
+									printSpooler.getEmailCc(), printSpooler.getEmailCcn(), output, name);
+						}
+					} catch (Exception ex) {
+						LOGGER.error("Error while sending email for report pgStampa: {}", pgStampa, ex);
+					}
+				}
+			});
 
-
-			PrintSpooler printSpooler = printRepository.findOne(pgStampa);
-	        if (printSpooler.getDtProssimaEsecuzione() != null){
-                GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
-                data_da.setTime(printSpooler.getDtProssimaEsecuzione());
-                int addType = Calendar.DATE;
-                if (printSpooler.getTiIntervallo().equals(TipoIntervallo.G))
-                	addType = Calendar.DATE;
-                else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.S))
-                	addType = Calendar.WEEK_OF_YEAR;
-                else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.M))
-                	addType = Calendar.MONTH;
-                data_da.add(addType, printSpooler.getIntervallo());
-                printSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));
-	        }			
-			printSpooler.setStato(PrintState.S);
-			printSpooler.setServer(serverURL.concat("/api/v1/get/print"));
-			printSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
-			printSpooler.setNomeFile(name);
-			printRepository.save(printSpooler);
-            if (printSpooler.getFlEmail()){
-            	try {
-                	StringBuffer bodyText = new StringBuffer(printSpooler.getEmailBody()==null?"":printSpooler.getEmailBody());
-                	bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
-                	bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
-                	bodyText.append("Qualsiasi suo utilizzo, comunicazione o diffusione non autorizzata e' proibita.<br>");
-                	bodyText.append("Qualora riceviate detta e-mail per errore, vogliate distruggerla.<br><br>");
-                	bodyText.append("<b>Attenzione: </b><br>");
-                	bodyText.append("Questa e' una e-mail generata automaticamente da un server non presidiato, La preghiamo di non rispondere. ");
-                	bodyText.append("Questa casella di posta elettronica non e' abilitata alla ricezione di messaggi.<br>");
-                	if (printSpooler.getDtProssimaEsecuzione() != null){
-                		StringTokenizer indirizzi = new StringTokenizer(printSpooler.getEmailA(),",");
-            			bodyText.append("Se non desidera piu' far parte della lista di distribuzione della stampa allegata clicchi ");
-                		while(indirizzi.hasMoreElements()){
-                			String indirizzo = (String)indirizzi.nextElement();
-                			String messaggio = "<a href=\"https://contab.cnr.it/SIGLA/cancellaSchedulazione.do?pgStampa=pg"+
-                					String.valueOf(printSpooler.getPgStampa()).trim()+"&indirizzoEMail="+indirizzo+"\">qui</a> per cancellarsi.<br></body></html>";
-                			mailService.send(printSpooler.getEmailSubject(), bodyText.toString().concat(messaggio), indirizzo, 
-                					printSpooler.getEmailCc(), printSpooler.getEmailCcn(), output, name);
-                		}
-                	}else{
-                    	bodyText.append("</body></html>");
-            			mailService.send(printSpooler.getEmailSubject(), bodyText.toString(), printSpooler.getEmailA(), 
-            					printSpooler.getEmailCc(), printSpooler.getEmailCcn(), output, name);
-                	}            		
-            	} catch (Exception ex) {
-            		LOGGER.error("Error while sending email for report pgStampa: {}", pgStampa, ex);
-            	}
-            }			
 		} catch (Exception e) {
 			error(printRepository.findOne(pgStampa), e);
 		}
