@@ -62,7 +62,7 @@ public class QueueConfiguration implements InitializingBean {
         ILock lock = hazelcastInstance.getLock(lockKey);
         try {
             LOGGER.info("try lock {}", lockKey);
-            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+            if (lock.tryLock(1, TimeUnit.MILLISECONDS)) {
                 try {
                     return excelService.executeExcel(excelSpooler);
                 } finally {
