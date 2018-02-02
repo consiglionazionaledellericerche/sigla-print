@@ -7,6 +7,7 @@ import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
+import it.cnr.si.repository.ParametriEnteRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
 
@@ -19,6 +20,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,6 +61,8 @@ public class ExcelService implements InitializingBean {
 
 	@Autowired
 	private PrintStorageService storageService;
+    @Autowired
+    private ParametriEnteRepository parametriEnteRepository;
 
 	@Autowired
 	private ExcelRepository excelRepository;
@@ -177,6 +182,7 @@ public class ExcelService implements InitializingBean {
 			byte[] byteArray = baos.toByteArray();
 
 			storageService.write(collect, byteArray).thenAccept(aVoid -> {
+                final String oldFileName = excelSpooler.getNomeFile();
                 if (excelSpooler.getDtProssimaEsecuzione() != null){
                     GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
                     data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
@@ -201,6 +207,9 @@ public class ExcelService implements InitializingBean {
                         try (FileOutputStream out = new FileOutputStream(output)) {
                             IOUtils.copy(storageService.get(collect), out);
                         }
+                        Optional.ofNullable(oldFileName)
+                                .map(nomeFile -> Arrays.asList(excelSpooler.getUtcr(), nomeFile).stream().collect(Collectors.joining(fileSeparator)))
+                                .ifPresent(id -> storageService.delete(id));
                         StringBuffer bodyText = new StringBuffer(excelSpooler.getEmailBody()==null?"":excelSpooler.getEmailBody());
                         bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
                         bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
@@ -300,7 +309,9 @@ public class ExcelService implements InitializingBean {
 	}
 	
 	public void deleteXls() {
-    	Iterable<Long> findXlsToDelete = excelRepository.findXlsToDelete();
+        LocalDateTime localDateTime = LocalDateTime.now().minusDays(Optional.ofNullable(parametriEnteRepository.findCancellaStampe())
+                .orElse(BigDecimal.valueOf(30)).longValue());
+	    Iterable<Long> findXlsToDelete = excelRepository.findXlsToDelete(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
     	for (Long pgEstrazione : findXlsToDelete) {
     		deleteXls(pgEstrazione);
 		}		
