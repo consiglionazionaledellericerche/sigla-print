@@ -5,6 +5,7 @@ import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.domain.sigla.TipoIntervallo;
 import it.cnr.si.exception.JasperRuntimeException;
+import it.cnr.si.repository.ParametriEnteRepository;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -31,12 +32,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,7 +60,10 @@ public class PrintService implements InitializingBean{
 	@Autowired
 	private PrintRepository printRepository;
 
-	@Autowired
+    @Autowired
+    private ParametriEnteRepository parametriEnteRepository;
+
+    @Autowired
 	private CacheService cacheService;
 
 	@Autowired
@@ -189,8 +196,8 @@ public class PrintService implements InitializingBean{
 			byte[] byteArray = byteArrayOutputStream.toByteArray();
 
 			storageService.write(collect, byteArray).thenAccept(aVoid -> {
-
 				PrintSpooler printSpooler = printRepository.findOne(pgStampa);
+				final String oldFileName = printSpooler.getNomeFile();
 				if (printSpooler.getDtProssimaEsecuzione() != null){
 					GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
 					data_da.setTime(printSpooler.getDtProssimaEsecuzione());
@@ -215,6 +222,9 @@ public class PrintService implements InitializingBean{
 						try (FileOutputStream out = new FileOutputStream(output)) {
 							IOUtils.copy(storageService.get(collect), out);
 						}
+						Optional.ofNullable(oldFileName)
+                                .map(nomeFile -> Arrays.asList(userName, nomeFile).stream().collect(Collectors.joining(fileSeparator)))
+                                .ifPresent(id -> storageService.delete(id));
 						StringBuffer bodyText = new StringBuffer(printSpooler.getEmailBody()==null?"":printSpooler.getEmailBody());
 						bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
 						bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
@@ -258,8 +268,11 @@ public class PrintService implements InitializingBean{
         storageService.delete(path);
 		printRepository.delete(printSpooler);
 	}
+
 	public void deleteReport() {
-    	Iterable<Long> findReporsToDelete = printRepository.findReportsToDelete();
+	    LocalDateTime localDateTime = LocalDateTime.now().minusDays(Optional.ofNullable(parametriEnteRepository.findCancellaStampe())
+                .orElse(BigDecimal.valueOf(30)).longValue());
+        Iterable<Long> findReporsToDelete = printRepository.findReportsToDelete(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
     	for (Long pgStampa : findReporsToDelete) {
     		deleteReport(pgStampa);
 		}

@@ -35,9 +35,9 @@ spring.jpa:
 #  database-platform: org.hibernate.dialect.Oracle10gDialect
 
 spring.datasource:
-  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
+  url: jdbc:oracle:thin:@sigladb.cedrc.cnr.it:1521:SIGLAP
   username: PCIR009
-  password: dbform
+  password: nemo1112!
   driverClassName: oracle.jdbc.OracleDriver
 
 dir.image: /img/
