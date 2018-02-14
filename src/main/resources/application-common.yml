@@ -35,7 +35,7 @@ spring.jpa:
 #  database-platform: org.hibernate.dialect.Oracle10gDialect
 
 spring.datasource:
-  url: jdbc:oracle:thin:@sigladb.cedrc.cnr.it:1521:SIGLAF
+  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
   username: PCIR009
   password: dbform
   driverClassName: oracle.jdbc.OracleDriver
