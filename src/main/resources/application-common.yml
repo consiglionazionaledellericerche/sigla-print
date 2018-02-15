@@ -18,7 +18,7 @@ print:
 
 cnr:
   gitlab:
-    url: http://git.si.cnr.it/dev/sigla-reports/raw/master
+    url: http://git.si.cnr.it/dev/sigla-reports/raw/formazione
     token: TyB9NvodV1sDyroHF4zQ
   ajp:
     port: 8009
