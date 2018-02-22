@@ -74,10 +74,10 @@ public class PrintResource {
                 name);
         String path = Arrays.asList(user, name).stream().collect(Collectors.joining(fileSeparator));
         try {
-
             InputStream inputStream = storageService.get(path);
-			return new ResponseEntity<>(IOUtils.toByteArray(inputStream),
-			        headers, HttpStatus.OK);
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+            inputStream.close();
+            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
 		} catch (IOException e) {
 			LOGGER.error("Cannot find file: {}", path, e);
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -112,8 +112,9 @@ public class PrintResource {
 
                 InputStream inputStream = storageService.get(path);
 
-    			return new ResponseEntity<>(IOUtils.toByteArray(inputStream),
-    			        headers, HttpStatus.OK);        		
+                byte[] bytes = IOUtils.toByteArray(inputStream);
+                inputStream.close();
+                return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
         	}
 		} catch (IOException e) {
 			LOGGER.error("Cannot find file: {}", path, e);
