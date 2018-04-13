@@ -2,7 +2,7 @@ security.basic.enabled: false
 
 management.info.git.mode: full
 
-spring.application.name: sigla-print-multi-impegni
+spring.application.name: sigla-print
 spring.mail.host: smtp.amministrazione.cnr.it
 spring.mail.username: amministrazione_sigla
 spring.mail.password: sigla
