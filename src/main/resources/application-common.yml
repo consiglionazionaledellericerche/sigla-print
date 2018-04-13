@@ -18,7 +18,7 @@ print:
 
 cnr:
   gitlab:
-    url: http://git.si.cnr.it/dev/sigla-reports/raw/formazione
+    url: http://git.si.cnr.it/dev/sigla-reports/raw/multi-impegni
     token: TyB9NvodV1sDyroHF4zQ
   ajp:
     port: 8009
@@ -35,9 +35,9 @@ spring.jpa:
 #  database-platform: org.hibernate.dialect.Oracle10gDialect
 
 spring.datasource:
-  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
+  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAT
   username: PCIR009
-  password: dbform
+  password: dbtest
   driverClassName: oracle.jdbc.OracleDriver
 
 dir.image: /img/
