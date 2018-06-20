@@ -4,8 +4,12 @@ import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.domain.sigla.PrintSpoolerParam;
 import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
 import it.cnr.si.repository.PrintRepository;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -93,8 +97,24 @@ public class PrintServiceTest {
 
         assertEquals(baos1.size(), baos2.size());    	
     }
-    
-    
+
+    @Test
+    public void testMissioni() throws JRException, IOException {
+        PrintSpooler printSpooler = new PrintSpooler((long)5760923);
+        printSpooler.setReport("/missioni/RimborsoMissione.jrxml");
+        Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();
+        params.add(new PrintSpoolerParam(new PrintSpoolerParamKey(
+                JRParameter.REPORT_DATA_SOURCE, printSpooler),
+                IOUtils.toString(this.getClass().getResourceAsStream("/missioni/rimborso.json"), StandardCharsets.UTF_8.name()),
+                String.class.getCanonicalName()));
+        printSpooler.setParams(params);
+
+        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler);
+        ByteArrayOutputStream baos = printService.print(print1);
+        assertTrue(baos.size() > 100_000);
+    }
+
+
     @Test
     public void deleteReport() {
 		printService.deleteReport();

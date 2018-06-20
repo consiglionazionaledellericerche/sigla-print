@@ -8,6 +8,7 @@ import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ParametriEnteRepository;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import net.sf.jasperreports.export.ExporterInput;
@@ -129,10 +130,19 @@ public class PrintService implements InitializingBean{
 		LOGGER.info("jasperReportName = {}", printSpooler.getReport());
 		Connection conn = null;
 		try {
-			conn = databaseConfiguration.connection();
-
-			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
             HashMap<String, Object> parameters = printSpooler.getParameters();
+            final Optional<String> reportDataSource = Optional.ofNullable(parameters)
+                    .flatMap(stringObjectHashMap -> Optional.ofNullable(stringObjectHashMap.get(JRParameter.REPORT_DATA_SOURCE)))
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast);
+
+            DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
+            if (reportDataSource.isPresent()) {
+                parameters.put(JRParameter.REPORT_DATA_SOURCE, new JsonDataSource(new ByteArrayInputStream(reportDataSource.get().getBytes())));
+            } else {
+                conn = databaseConfiguration.connection();
+            }
+
             parameters.put("DIR_IMAGE", dirImage);
             parameters.put(JRParameter.REPORT_VIRTUALIZER, fileVirtualizer());
 
@@ -142,23 +152,29 @@ public class PrintService implements InitializingBean{
 
 			JasperReportsContext jasperReportsContext = new CacheAwareJasperReportsContext(defaultJasperReportsContext);
 			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-			return jasperFillManager.fill(jasperReport,
-                    parameters,
-					conn);
-
-
+            if (reportDataSource.isPresent()) {
+                return jasperFillManager.fill(jasperReport,
+                        parameters);
+            } else {
+                return jasperFillManager.fill(jasperReport,
+                        parameters,
+                        conn);
+            }
 		} catch (JRRuntimeException | SQLException | JRException e) {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
-			try {
-				conn.commit();
-				conn.close();
-			} catch (SQLException e) {
-				throw new JasperRuntimeException("unable to process report", e);
-			}
+            Optional.ofNullable(conn)
+                    .ifPresent(connection -> {
+                        try {
+                            connection.commit();
+                            connection.close();
+                        } catch (SQLException e) {
+                            throw new JasperRuntimeException("unable to process report", e);
+                        }
+                    });
 		}
 	}
-	
+
 	public Long print(Integer priorita) {
 		return printRepository.findReportToExecute(priorita);    
 	}
