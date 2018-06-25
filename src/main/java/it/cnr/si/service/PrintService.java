@@ -88,6 +88,9 @@ public class PrintService implements InitializingBean{
     @Value("${print.max.page.size}")
     private Integer maxPageSize;
 
+    @Value("${print.virtualizer.enable}")
+    private Boolean virtualizerEnable;
+
     private final CounterService counterService;
 	public static final String TIMES_NEW_ROMAN = "Times New Roman";
 
@@ -144,7 +147,8 @@ public class PrintService implements InitializingBean{
             }
 
             parameters.put("DIR_IMAGE", dirImage);
-            parameters.put(JRParameter.REPORT_VIRTUALIZER, fileVirtualizer());
+            if (virtualizerEnable)
+                parameters.put(JRParameter.REPORT_VIRTUALIZER, fileVirtualizer());
 
             defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
