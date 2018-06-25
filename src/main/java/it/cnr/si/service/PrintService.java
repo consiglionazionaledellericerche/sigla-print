@@ -167,6 +167,8 @@ public class PrintService implements InitializingBean{
 		} catch (JRRuntimeException | SQLException | JRException e) {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
+            if (virtualizerEnable)
+                fileVirtualizer().cleanup();
             Optional.ofNullable(conn)
                     .ifPresent(connection -> {
                         try {
