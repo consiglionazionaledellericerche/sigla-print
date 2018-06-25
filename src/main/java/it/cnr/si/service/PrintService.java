@@ -132,7 +132,8 @@ public class PrintService implements InitializingBean{
 	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler)  {
 		LOGGER.info("jasperReportName = {}", printSpooler.getReport());
 		Connection conn = null;
-		try {
+        final JRFileVirtualizer jrFileVirtualizer = fileVirtualizer();
+        try {
             HashMap<String, Object> parameters = printSpooler.getParameters();
             final Optional<String> reportDataSource = Optional.ofNullable(parameters)
                     .flatMap(stringObjectHashMap -> Optional.ofNullable(stringObjectHashMap.get(JRParameter.REPORT_DATA_SOURCE)))
@@ -148,7 +149,7 @@ public class PrintService implements InitializingBean{
 
             parameters.put("DIR_IMAGE", dirImage);
             if (virtualizerEnable)
-                parameters.put(JRParameter.REPORT_VIRTUALIZER, fileVirtualizer());
+                parameters.put(JRParameter.REPORT_VIRTUALIZER, jrFileVirtualizer);
 
             defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
@@ -168,7 +169,7 @@ public class PrintService implements InitializingBean{
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
             if (virtualizerEnable)
-                fileVirtualizer().cleanup();
+                jrFileVirtualizer.cleanup();
             Optional.ofNullable(conn)
                     .ifPresent(connection -> {
                         try {
