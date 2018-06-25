@@ -99,7 +99,7 @@ public class PrintServiceTest {
     }
 
     @Test
-    public void testMissioni() throws JRException, IOException {
+    public void testMissioniRimborso() throws JRException, IOException {
         PrintSpooler printSpooler = new PrintSpooler((long)5760923);
         printSpooler.setReport("/missioni/RimborsoMissione.jrxml");
         Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();
@@ -114,7 +114,21 @@ public class PrintServiceTest {
         assertTrue(baos.size() > 100_000);
     }
 
+    @Test
+    public void testMissioneOrdine() throws JRException, IOException {
+        PrintSpooler printSpooler = new PrintSpooler((long)5760923);
+        printSpooler.setReport("/missioni/OrdineMissione.jrxml");
+        Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();
+        params.add(new PrintSpoolerParam(new PrintSpoolerParamKey(
+                JRParameter.REPORT_DATA_SOURCE, printSpooler),
+                IOUtils.toString(this.getClass().getResourceAsStream("/missioni/ordine.json"), StandardCharsets.UTF_8.name()),
+                String.class.getCanonicalName()));
+        printSpooler.setParams(params);
 
+        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler);
+        ByteArrayOutputStream baos = printService.print(print1);
+        assertTrue(baos.size() > 100_000);
+    }
     @Test
     public void deleteReport() {
 		printService.deleteReport();
