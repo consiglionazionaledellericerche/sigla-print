@@ -202,8 +202,9 @@ public class ExcelService implements InitializingBean {
                 excelSpooler.setDuva(Timestamp.from(ZonedDateTime.now().toInstant()));
                 excelRepository.save(excelSpooler);
                 if (excelSpooler.getFlEmail()){
-                    try {
-                        File output = File.createTempFile(collect, null);
+					File output = null;
+					try {
+                        output = File.createTempFile(collect, null);
                         try (FileOutputStream out = new FileOutputStream(output)) {
                             IOUtils.copy(storageService.get(collect), out);
                         }
@@ -235,7 +236,10 @@ public class ExcelService implements InitializingBean {
                         }
                     } catch (Exception ex) {
                         LOGGER.error("Error while sending email for report pgStampa: {}", excelSpooler.getPgEstrazione(), ex);
-                    }
+                    } finally {
+						Optional.ofNullable(output)
+								.ifPresent(File::deleteOnExit);
+					}
                 }
             });
 
