@@ -273,7 +273,7 @@ public class PrintService implements InitializingBean{
 						LOGGER.error("Error while sending email for report pgStampa: {}", pgStampa, ex);
 					} finally {
 						Optional.ofNullable(output)
-								.ifPresent(File::deleteOnExit);
+								.ifPresent(File::delete);
 					}
 				}
 			});

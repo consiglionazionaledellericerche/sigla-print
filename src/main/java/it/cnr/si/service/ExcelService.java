@@ -238,7 +238,7 @@ public class ExcelService implements InitializingBean {
                         LOGGER.error("Error while sending email for report pgStampa: {}", excelSpooler.getPgEstrazione(), ex);
                     } finally {
 						Optional.ofNullable(output)
-								.ifPresent(File::deleteOnExit);
+								.ifPresent(File::delete);
 					}
                 }
             });
