@@ -233,8 +233,9 @@ public class PrintService implements InitializingBean{
 				printSpooler.setNomeFile(name);
 				printRepository.save(printSpooler);
 				if (printSpooler.getFlEmail()){
+					File output = null;
 					try {
-						File output = File.createTempFile(collect, null);
+						output = File.createTempFile(collect, null);
 						try (FileOutputStream out = new FileOutputStream(output)) {
 							IOUtils.copy(storageService.get(collect), out);
 						}
@@ -266,10 +267,12 @@ public class PrintService implements InitializingBean{
 						}
 					} catch (Exception ex) {
 						LOGGER.error("Error while sending email for report pgStampa: {}", pgStampa, ex);
+					} finally {
+						Optional.ofNullable(output)
+								.ifPresent(File::deleteOnExit);
 					}
 				}
 			});
-
 		} catch (Exception e) {
 			error(printRepository.findOne(pgStampa), e);
 		}
