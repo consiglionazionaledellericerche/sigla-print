@@ -100,11 +100,11 @@ public class PrintService implements InitializingBean{
 	}
 
 	@Bean
-	JRFileVirtualizer fileVirtualizer() {
+	public JRFileVirtualizer fileVirtualizer() {
 		return new JRFileVirtualizer(maxPageSize, tempDir);
 	}
 
-	public ByteArrayOutputStream print(JasperPrint print) {
+	public ByteArrayOutputStream print(JasperPrint print, JRVirtualizer jrVirtualizer) {
 
 		this.counterService.increment("services.system.PrintService.invoked");
 
@@ -126,16 +126,15 @@ public class PrintService implements InitializingBean{
 			throw new JasperRuntimeException("unable to export report " + print.toString(), e);
 		} finally {
             if (virtualizerEnable)
-                fileVirtualizer().cleanup();
+                jrVirtualizer.cleanup();
         }
 
 		return outputStream;
 	}
 	
-	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler)  {
+	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler, JRVirtualizer jrVirtualizer)  {
 		LOGGER.info("jasperReportName = {}", printSpooler.getReport());
 		Connection conn = null;
-        final JRFileVirtualizer jrFileVirtualizer = fileVirtualizer();
         try {
             HashMap<String, Object> parameters = printSpooler.getParameters();
             final Optional<String> reportDataSource = Optional.ofNullable(parameters)
@@ -152,7 +151,7 @@ public class PrintService implements InitializingBean{
 
             parameters.put("DIR_IMAGE", dirImage);
             if (virtualizerEnable)
-                parameters.put(JRParameter.REPORT_VIRTUALIZER, jrFileVirtualizer);
+                parameters.put(JRParameter.REPORT_VIRTUALIZER, jrVirtualizer);
 
             defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
@@ -213,8 +212,8 @@ public class PrintService implements InitializingBean{
 	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)	
-	public Long executeReport(JasperPrint jasperPrint, Long pgStampa, String name, String userName) {
-		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
+	public Long executeReport(JasperPrint jasperPrint, JRVirtualizer jrVirtualizer, Long pgStampa, String name, String userName) {
+		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint, jrVirtualizer);
 		try {
 			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
 			byte[] byteArray = byteArrayOutputStream.toByteArray();
