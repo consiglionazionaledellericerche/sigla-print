@@ -6,6 +6,7 @@ import it.cnr.si.dto.HookRequest;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
 import it.cnr.si.service.PrintStorageService;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,9 @@ public class PrintResource {
         String fileName = printSpooler.getName();
         headers.add("content-disposition", "inline;filename=" +
                 fileName);
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         ByteArrayOutputStream outputStream = printService.print(
-        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler));
+        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer), jrFileVirtualizer);
 
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);

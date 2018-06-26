@@ -9,6 +9,7 @@ import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,9 +68,9 @@ public class PrintServiceTest {
     	params.add(new PrintSpoolerParam(new PrintSpoolerParamKey("aPg_da", printSpooler), "6246", Long.class.getCanonicalName()));
 
     	printSpooler.setParams(params);
-
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
     	ByteArrayOutputStream baos = printService.print(
-    			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler));
+    			printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer), jrFileVirtualizer);
         assertTrue(baos.size() > 100_000);
 
     }
@@ -88,12 +89,13 @@ public class PrintServiceTest {
     	params.add(new PrintSpoolerParam(new PrintSpoolerParamKey("aPg_da", printSpooler), "6246", Long.class.getCanonicalName()));
 
     	printSpooler.setParams(params);
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
 
-    	JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler);
-        ByteArrayOutputStream baos1 = printService.print(print1);
+    	JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
+        ByteArrayOutputStream baos1 = printService.print(print1, jrFileVirtualizer);
 
-        JasperPrint print2 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler);
-        ByteArrayOutputStream baos2 = printService.print(print2);
+        JasperPrint print2 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
+        ByteArrayOutputStream baos2 = printService.print(print2, jrFileVirtualizer);
 
         assertEquals(baos1.size(), baos2.size());    	
     }
@@ -108,9 +110,9 @@ public class PrintServiceTest {
                 IOUtils.toString(this.getClass().getResourceAsStream("/missioni/rimborso.json"), StandardCharsets.UTF_8.name()),
                 String.class.getCanonicalName()));
         printSpooler.setParams(params);
-
-        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler);
-        ByteArrayOutputStream baos = printService.print(print1);
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
+        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
+        ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
         assertTrue(baos.size() > 100_000);
     }
 
@@ -124,9 +126,9 @@ public class PrintServiceTest {
                 IOUtils.toString(this.getClass().getResourceAsStream("/missioni/ordine.json"), StandardCharsets.UTF_8.name()),
                 String.class.getCanonicalName()));
         printSpooler.setParams(params);
-
-        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler);
-        ByteArrayOutputStream baos = printService.print(print1);
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
+        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
+        ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
         assertTrue(baos.size() > 100_000);
     }
     @Test
