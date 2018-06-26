@@ -124,7 +124,10 @@ public class PrintService implements InitializingBean{
 			exporter.exportReport();
 		} catch (JRException e) {
 			throw new JasperRuntimeException("unable to export report " + print.toString(), e);
-		}
+		} finally {
+            if (virtualizerEnable)
+                fileVirtualizer().cleanup();
+        }
 
 		return outputStream;
 	}
@@ -168,8 +171,6 @@ public class PrintService implements InitializingBean{
 		} catch (JRRuntimeException | SQLException | JRException e) {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
-            if (virtualizerEnable)
-                jrFileVirtualizer.cleanup();
             Optional.ofNullable(conn)
                     .ifPresent(connection -> {
                         try {
