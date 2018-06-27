@@ -1,0 +1,57 @@
+{
+  "anno": 2018,
+  "numero": 78,
+  "dataInserimento": "13/06/2018",
+  "cognomeRich": "ALBERTI",
+  "nomeRich": "LUCIA",
+  "matricolaRich": "11334",
+  "codiceFiscaleRich": "LBRLCU63C55F023B",
+  "luogoDiNascitaRich": "MASSA",
+  "dataDiNascitaRich": "15/03/1963",
+  "comuneResidenzaRich": "POGGIO MIRTETO",
+  "indirizzoResidenzaRich": "VIA CAVOUR 27",
+  "domicilioFiscaleRich": "",
+  "datoreLavoroRich": "ISTITUTO DI STUDI SUL MEDITERRANEO ANTICO",
+  "qualificaRich": "Ricercatore",
+  "livelloRich": "03",
+  "oggetto": "Partecipazione a congresso CICOP 2018 a Matera e sopralluoghi in provincia di Bari e Lecce",
+  "dataInizioMissione": "17/06/2018 09:00",
+  "dataFineMissione": "24/06/2018 22:16",
+  "destinazione": "Matera, Bari, Lecce",
+  "targa": "DE219AG",
+  "cartaCircolazione": "BF0431160",
+  "polizzaAssicurativa": "0681026542",
+  "marca": "FIAT",
+  "modello": "Panda 4x4",
+  "numeroPatente": "MS2061327P",
+  "dataRilascioPatente": "28/01/1992",
+  "dataScadenzaPatente": "24/07/2022",
+  "entePatente": "Ministero dei Trasporti Direzione Generale della Motorizzazione Civile e dei Trasporti in concession",
+  "stato": "Confermato",
+  "motiviIspettivi": "",
+  "motiviUrgenza": "",
+  "motiviTrasporto": "",
+  "altriMotivi": "Per motivi logistici, relativi alle distanze dei siti in oggetto e al dover compiere sopralluoghi in siti non raggiungibili tramite i mezzi pubblici. La sosta a Fiumicino serve a prendere i colleghi montenegrini del Laboratorio Archeologico Congiunto. Gli spostamenti elencati possono subire variazioni.",
+  "spostamenti": [{
+    "percorsoDa": "Poggio Mirteto (RI)",
+    "percorsoA": "Fiumicino"
+  }, {
+    "percorsoDa": "Fiumicino",
+    "percorsoA": "Matera"
+  }, {
+    "percorsoDa": "Matera",
+    "percorsoA": "Provincia di Bari"
+  }, {
+    "percorsoDa": "Provincia di Bari",
+    "percorsoA": "Provincia di Lecce"
+  }, {
+    "percorsoDa": "Provincia di Lecce",
+    "percorsoA": "Provincia di Bari"
+  }, {
+    "percorsoDa": "Provincia di Bari",
+    "percorsoA": "Fiumicino"
+  }, {
+    "percorsoDa": "Fiumicino",
+    "percorsoA": "Poggio Mirteto (RI)"
+  }]
+}

@@ -131,6 +131,23 @@ public class PrintServiceTest {
         ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
         assertTrue(baos.size() > 100_000);
     }
+
+    @Test
+    public void testMissioneOrdineAutoPropria() throws JRException, IOException {
+        PrintSpooler printSpooler = new PrintSpooler((long)5760923);
+        printSpooler.setReport("/missioni/OrdineMissioneAutoPropria.jrxml");
+        Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();
+        params.add(new PrintSpoolerParam(new PrintSpoolerParamKey(
+                JRParameter.REPORT_DATA_SOURCE, printSpooler),
+                IOUtils.toString(this.getClass().getResourceAsStream("/missioni/ordine-missione-auto-propria.json"), StandardCharsets.UTF_8.name()),
+                String.class.getCanonicalName()));
+        printSpooler.setParams(params);
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
+        JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
+        ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
+        assertTrue(baos.size() > 100_000);
+    }
+
     @Test
     public void deleteReport() {
 		printService.deleteReport();
