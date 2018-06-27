@@ -113,6 +113,9 @@ public class PrintServiceTest {
         final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
         ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
+        try(OutputStream outputStream = new FileOutputStream(printOutputDir + "/MissioneRimborso.pdf")) {
+            baos.writeTo(outputStream);
+        }
         assertTrue(baos.size() > 100_000);
     }
 
@@ -129,6 +132,9 @@ public class PrintServiceTest {
         final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
         ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
+        try(OutputStream outputStream = new FileOutputStream(printOutputDir + "/MissioneOrdine.pdf")) {
+            baos.writeTo(outputStream);
+        }
         assertTrue(baos.size() > 100_000);
     }
 
@@ -145,6 +151,9 @@ public class PrintServiceTest {
         final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         JasperPrint print1 = printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer);
         ByteArrayOutputStream baos = printService.print(print1, jrFileVirtualizer);
+        try(OutputStream outputStream = new FileOutputStream(printOutputDir + "/MissioneAutoPropria.pdf")) {
+            baos.writeTo(outputStream);
+        }
         assertTrue(baos.size() > 100_000);
     }
 
