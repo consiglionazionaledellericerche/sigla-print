@@ -50,7 +50,7 @@ public class PrintResource {
 
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
-        LOGGER.info("print request: {}", printSpooler.getReport());
+        LOGGER.info("start print request: {} {}", printSpooler.getReport(), printSpooler.getPgStampa());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
@@ -60,7 +60,7 @@ public class PrintResource {
         final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         ByteArrayOutputStream outputStream = printService.print(
         		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer), jrFileVirtualizer);
-
+        LOGGER.info("end print request: {} {}", printSpooler.getReport(), printSpooler.getPgStampa());
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);
 
