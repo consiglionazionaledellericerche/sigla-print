@@ -6,6 +6,7 @@ import it.cnr.si.dto.HookRequest;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
 import it.cnr.si.service.PrintStorageService;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +50,17 @@ public class PrintResource {
 
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
-        LOGGER.info("print request: {}", printSpooler.getReport());
+        LOGGER.info("start print request: {} {}", printSpooler.getReport(), printSpooler.getPgStampa());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
         String fileName = printSpooler.getName();
         headers.add("content-disposition", "inline;filename=" +
                 fileName);
+        final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         ByteArrayOutputStream outputStream = printService.print(
-        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler));
-
+        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer), jrFileVirtualizer);
+        LOGGER.info("end print request: {} {}", printSpooler.getReport(), printSpooler.getPgStampa());
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);
 

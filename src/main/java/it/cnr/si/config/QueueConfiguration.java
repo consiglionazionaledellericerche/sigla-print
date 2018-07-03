@@ -7,6 +7,7 @@ import it.cnr.si.service.CacheService;
 import it.cnr.si.service.ExcelService;
 import it.cnr.si.service.PrintService;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -123,8 +124,9 @@ public class QueueConfiguration implements InitializingBean {
                             try {
                                 print = printService.print(pgStampa);
                                 if (Optional.ofNullable(print).isPresent()) {
-                                    JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print);
-                                    printService.executeReport(jasperPrint, print.getPgStampa(),
+                                    final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
+                                    JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print, jrFileVirtualizer);
+                                    printService.executeReport(jasperPrint, jrFileVirtualizer, print.getPgStampa(),
                                             print.getName(),
                                             print.getUtcr());
                                 }

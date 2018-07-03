@@ -449,7 +449,10 @@ public class PrintSpooler {
     }
 
     public String getKey() {
-        return getReport().substring(0, getReport().indexOf(JASPER)).concat(JRXML);
+        return Optional.ofNullable(getReport())
+                .filter(s -> s.endsWith(JASPER))
+                .map(s -> s.substring(0, s.indexOf(JASPER)).concat(JRXML))
+                .orElse(getReport());
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

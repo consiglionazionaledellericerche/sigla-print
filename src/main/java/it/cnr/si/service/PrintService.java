@@ -8,6 +8,7 @@ import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ParametriEnteRepository;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import net.sf.jasperreports.export.ExporterInput;
@@ -87,6 +88,9 @@ public class PrintService implements InitializingBean{
     @Value("${print.max.page.size}")
     private Integer maxPageSize;
 
+    @Value("${print.virtualizer.enable}")
+    private Boolean virtualizerEnable;
+
     private final CounterService counterService;
 	public static final String TIMES_NEW_ROMAN = "Times New Roman";
 
@@ -96,11 +100,11 @@ public class PrintService implements InitializingBean{
 	}
 
 	@Bean
-	JRFileVirtualizer fileVirtualizer() {
+	public JRFileVirtualizer fileVirtualizer() {
 		return new JRFileVirtualizer(maxPageSize, tempDir);
 	}
 
-	public ByteArrayOutputStream print(JasperPrint print) {
+	public ByteArrayOutputStream print(JasperPrint print, JRVirtualizer jrVirtualizer) {
 
 		this.counterService.increment("services.system.PrintService.invoked");
 
@@ -120,21 +124,34 @@ public class PrintService implements InitializingBean{
 			exporter.exportReport();
 		} catch (JRException e) {
 			throw new JasperRuntimeException("unable to export report " + print.toString(), e);
-		}
+		} finally {
+            if (virtualizerEnable)
+                jrVirtualizer.cleanup();
+        }
 
 		return outputStream;
 	}
 	
-	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler)  {
+	public JasperPrint jasperPrint(JasperReport jasperReport, PrintSpooler printSpooler, JRVirtualizer jrVirtualizer)  {
 		LOGGER.info("jasperReportName = {}", printSpooler.getReport());
 		Connection conn = null;
-		try {
-			conn = databaseConfiguration.connection();
-
-			DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
+        try {
             HashMap<String, Object> parameters = printSpooler.getParameters();
+            final Optional<String> reportDataSource = Optional.ofNullable(parameters)
+                    .flatMap(stringObjectHashMap -> Optional.ofNullable(stringObjectHashMap.get(JRParameter.REPORT_DATA_SOURCE)))
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast);
+
+            DefaultJasperReportsContext defaultJasperReportsContext = DefaultJasperReportsContext.getInstance();
+            if (reportDataSource.isPresent()) {
+                parameters.put(JRParameter.REPORT_DATA_SOURCE, new JsonDataSource(new ByteArrayInputStream(reportDataSource.get().getBytes())));
+            } else {
+                conn = databaseConfiguration.connection();
+            }
+
             parameters.put("DIR_IMAGE", dirImage);
-            parameters.put(JRParameter.REPORT_VIRTUALIZER, fileVirtualizer());
+            if (virtualizerEnable)
+                parameters.put(JRParameter.REPORT_VIRTUALIZER, jrVirtualizer);
 
             defaultJasperReportsContext.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 			defaultJasperReportsContext.setProperty("net.sf.jasperreports.default.pdf.font.name", TIMES_NEW_ROMAN);
@@ -142,23 +159,29 @@ public class PrintService implements InitializingBean{
 
 			JasperReportsContext jasperReportsContext = new CacheAwareJasperReportsContext(defaultJasperReportsContext);
 			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-			return jasperFillManager.fill(jasperReport,
-                    parameters,
-					conn);
-
-
+            if (reportDataSource.isPresent()) {
+                return jasperFillManager.fill(jasperReport,
+                        parameters);
+            } else {
+                return jasperFillManager.fill(jasperReport,
+                        parameters,
+                        conn);
+            }
 		} catch (JRRuntimeException | SQLException | JRException e) {
 			throw new JasperRuntimeException("unable to process report", e);
 		} finally {
-			try {
-				conn.commit();
-				conn.close();
-			} catch (SQLException e) {
-				throw new JasperRuntimeException("unable to process report", e);
-			}
+            Optional.ofNullable(conn)
+                    .ifPresent(connection -> {
+                        try {
+                            connection.commit();
+                            connection.close();
+                        } catch (SQLException e) {
+                            throw new JasperRuntimeException("unable to process report", e);
+                        }
+                    });
 		}
 	}
-	
+
 	public Long print(Integer priorita) {
 		return printRepository.findReportToExecute(priorita);    
 	}
@@ -189,8 +212,8 @@ public class PrintService implements InitializingBean{
 	}
 	
 	@Transactional(propagation=Propagation.REQUIRES_NEW)	
-	public Long executeReport(JasperPrint jasperPrint, Long pgStampa, String name, String userName) {
-		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint);
+	public Long executeReport(JasperPrint jasperPrint, JRVirtualizer jrVirtualizer, Long pgStampa, String name, String userName) {
+		ByteArrayOutputStream byteArrayOutputStream = print(jasperPrint, jrVirtualizer);
 		try {
 			String collect = Arrays.asList(userName, name).stream().collect(Collectors.joining(fileSeparator));
 			byte[] byteArray = byteArrayOutputStream.toByteArray();
@@ -217,8 +240,9 @@ public class PrintService implements InitializingBean{
 				printSpooler.setNomeFile(name);
 				printRepository.save(printSpooler);
 				if (printSpooler.getFlEmail()){
+					File output = null;
 					try {
-						File output = File.createTempFile(collect, null);
+						output = File.createTempFile(collect, null);
 						try (FileOutputStream out = new FileOutputStream(output)) {
 							IOUtils.copy(storageService.get(collect), out);
 						}
@@ -250,10 +274,12 @@ public class PrintService implements InitializingBean{
 						}
 					} catch (Exception ex) {
 						LOGGER.error("Error while sending email for report pgStampa: {}", pgStampa, ex);
+					} finally {
+						Optional.ofNullable(output)
+								.ifPresent(File::delete);
 					}
 				}
 			});
-
 		} catch (Exception e) {
 			error(printRepository.findOne(pgStampa), e);
 		}
