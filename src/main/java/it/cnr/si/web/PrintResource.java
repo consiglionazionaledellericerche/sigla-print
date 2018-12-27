@@ -50,7 +50,7 @@ public class PrintResource {
 
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
-        LOGGER.info("start print request: {} {}", printSpooler.getReport(), printSpooler.getPgStampa());
+        LOGGER.info("start print request: {}", printSpooler);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));

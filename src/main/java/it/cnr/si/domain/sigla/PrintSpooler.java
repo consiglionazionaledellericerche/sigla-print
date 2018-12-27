@@ -508,4 +508,41 @@ public class PrintSpooler {
                 ).orElse(false);
 
     }
+
+    @Override
+    public String toString() {
+        return "PrintSpooler{" +
+                "pgStampa=" + pgStampa +
+                ", dsStampa='" + dsStampa + '\'' +
+                ", dsUtente='" + dsUtente + '\'' +
+                ", dtScadenza=" + dtScadenza +
+                ", idReportGenerico=" + idReportGenerico +
+                ", intervalloFine=" + intervalloFine +
+                ", intervalloInizio=" + intervalloInizio +
+                ", nomeFile='" + nomeFile + '\'' +
+                ", priorita=" + priorita +
+                ", prioritaServer=" + prioritaServer +
+                ", report='" + report + '\'' +
+                ", server='" + server + '\'' +
+                ", dtProssimaEsecuzione=" + dtProssimaEsecuzione +
+                ", stato=" + stato +
+                ", tiVisibilita=" + tiVisibilita +
+                ", errore='" + errore + '\'' +
+                ", flEmail='" + flEmail + '\'' +
+                ", emailA='" + emailA + '\'' +
+                ", emailCc='" + emailCc + '\'' +
+                ", emailCcn='" + emailCcn + '\'' +
+                ", emailSubject='" + emailSubject + '\'' +
+                ", emailBody='" + emailBody + '\'' +
+                ", dtPartenza=" + dtPartenza +
+                ", intervallo=" + intervallo +
+                ", tiIntervallo=" + tiIntervallo +
+                ", dacr=" + dacr +
+                ", utcr='" + utcr + '\'' +
+                ", duva=" + duva +
+                ", utuv='" + utuv + '\'' +
+                ", pg_ver_rec=" + pg_ver_rec +
+                ", params=" + params +
+                '}';
+    }
 }
