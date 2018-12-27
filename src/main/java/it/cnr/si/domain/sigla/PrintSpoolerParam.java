@@ -61,4 +61,13 @@ public class PrintSpoolerParam {
 	public void setParamType(java.lang.String paramType) {
 		this.paramType = paramType;
 	}
+
+	@Override
+	public String toString() {
+		return "PrintSpoolerParam{" +
+				"key=" + key +
+				", valoreParam='" + valoreParam + '\'' +
+				", paramType='" + paramType + '\'' +
+				'}';
+	}
 }
