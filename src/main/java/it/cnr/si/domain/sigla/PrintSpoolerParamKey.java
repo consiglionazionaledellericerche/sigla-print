@@ -64,4 +64,11 @@ public class PrintSpoolerParamKey implements Serializable {
 	public int hashCode() {
 		return super.hashCode();
 	}
+
+	@Override
+	public String toString() {
+		return "PrintSpoolerParamKey{" +
+				"nomeParam='" + nomeParam + '\'' +
+				'}';
+	}
 }
