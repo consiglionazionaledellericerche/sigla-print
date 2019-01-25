@@ -21,7 +21,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
-    <sprint.version>2.3.10</sprint.version>
+    <sprint.version>2.3.12</sprint.version>
   </properties>
 
   <dependencyManagement>
@@ -164,14 +164,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.microsoft.azure</groupId>
-      <artifactId>azure-storage</artifactId>
-      <version>6.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-s3</artifactId>
-      <version>1.11.84</version>
+      <groupId>org.apache.chemistry.opencmis</groupId>
+      <artifactId>chemistry-opencmis-client-impl</artifactId>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 
