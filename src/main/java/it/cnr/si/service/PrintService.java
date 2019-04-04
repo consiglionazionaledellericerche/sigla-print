@@ -225,11 +225,11 @@ public class PrintService implements InitializingBean{
 					GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
 					data_da.setTime(printSpooler.getDtProssimaEsecuzione());
 					int addType = Calendar.DATE;
-					if (printSpooler.getTiIntervallo().equals(TipoIntervallo.G))
+					if (printSpooler.getTiIntervallo().equals(TipoIntervallo.G.name()))
 						addType = Calendar.DATE;
-					else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.S))
+					else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.S.name()))
 						addType = Calendar.WEEK_OF_YEAR;
-					else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.M))
+					else if (printSpooler.getTiIntervallo().equals(TipoIntervallo.M.name()))
 						addType = Calendar.MONTH;
 					data_da.add(addType, printSpooler.getIntervallo());
 					printSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));

@@ -187,11 +187,11 @@ public class ExcelService implements InitializingBean {
                     GregorianCalendar data_da = (GregorianCalendar) GregorianCalendar.getInstance();
                     data_da.setTime(excelSpooler.getDtProssimaEsecuzione());
                     int addType = Calendar.DATE;
-                    if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.G))
+                    if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.G.name()))
                         addType = Calendar.DATE;
-                    else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.S))
+                    else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.S.name()))
                         addType = Calendar.WEEK_OF_YEAR;
-                    else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.M))
+                    else if (excelSpooler.getTiIntervallo().equals(TipoIntervallo.M.name()))
                         addType = Calendar.MONTH;
                     data_da.add(addType, excelSpooler.getIntervallo());
                     excelSpooler.setDtProssimaEsecuzione(new Timestamp(data_da.getTimeInMillis()));
