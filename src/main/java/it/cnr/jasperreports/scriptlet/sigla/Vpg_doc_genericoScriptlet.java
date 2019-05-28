@@ -12,7 +12,7 @@ public class Vpg_doc_genericoScriptlet extends JRDefaultScriptlet {
 		java.sql.Connection conn = (java.sql.Connection)getParameterValue("REPORT_CONNECTION");
 		java.sql.CallableStatement cs = null; 
 		try{	        	
-			cs = conn.prepareCall("{call SPG_DOC_GENERICO(?,?,?,?,?,?,?,?,?)}");
+			cs = conn.prepareCall("{call SPG_DOC_GENERICO(?,?,?,?,?,?,?,?,?,?)}");
 			cs.setObject(1,(java.lang.String)getParameterValue("aCd_cds"));
 			cs.setObject(2,(java.lang.String)getParameterValue("aCd_uo"));
 			cs.setObject(3,(java.lang.Integer)getParameterValue("aEs"));
@@ -22,6 +22,7 @@ public class Vpg_doc_genericoScriptlet extends JRDefaultScriptlet {
 			cs.setObject(7,(new java.text.SimpleDateFormat("yyyy/MM/dd")).format((java.util.Date)getParameterValue("aDt_da")));
 			cs.setObject(8,(new java.text.SimpleDateFormat("yyyy/MM/dd")).format((java.util.Date)getParameterValue("aDt_a")));
 			cs.setObject(9,(java.lang.String)getParameterValue("aCd_terzo"));
+			cs.setObject(10,(java.lang.String)getParameterValue("acd_tdg"));
 			cs.executeQuery();
 		}catch (Throwable e) {
 			throw new JRScriptletException(e.getMessage());
