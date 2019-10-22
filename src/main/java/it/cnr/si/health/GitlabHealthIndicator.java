@@ -1,5 +1,11 @@
 package it.cnr.si.health;
 
+import it.cnr.si.config.GitLabConfiguration;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.RepositoryFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -9,25 +15,28 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class GitlabHealthIndicator implements HealthIndicator {
 
-    private RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private GitLabApi gitLabApi;
 
-    @Value("${cnr.gitlab.url}")
-    private String gitlabUrl;
+    @Autowired
+    private GitLabConfiguration gitLabConfiguration;
 
-    @Value("${cnr.gitlab.token}")
-    private String gitlabToken;
+    @Autowired
+    private Project project;
 
     @Override
     public Health health() {
+        try {
+            final RepositoryFile file = gitLabApi.getRepositoryFileApi().getFile(project, "README.md", gitLabConfiguration.getRef());
+            final String content = file.getDecodedContentAsString();
 
-        String content  = restTemplate.getForObject(gitlabUrl + "/README.md" + "?private_token={private_token}",
-                String.class, gitlabToken);
-
-        if (content.startsWith("Sigla")) {
-            return Health.up().build();
-        } else {
-            return Health.down().withDetail("message", content).build();
+            if (content.startsWith("Sigla")) {
+                return Health.up().build();
+            } else {
+                return Health.down().withDetail("message", content).build();
+            }
+        } catch (GitLabApiException e) {
+            return Health.down().withDetail("message", e.getMessage()).build();
         }
-
     }
 }
