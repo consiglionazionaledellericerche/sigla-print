@@ -5,7 +5,7 @@ management.info.git.mode: full
 spring.application.name: sigla-print
 spring.mail.host: smtp.amministrazione.cnr.it
 spring.mail.username: amministrazione_sigla
-spring.mail.***REMOVED***
+spring.mail.password: sigla
 spring.mail.from: sigla@cnr.it
 
 print:
@@ -19,8 +19,11 @@ print:
 
 cnr:
   gitlab:
-    url: http://git.si.cnr.it/dev/sigla-reports/raw/formazione
-    token: 4q7z9AzstUx29U_yvmQC
+    url: http://git.si.cnr.it
+    group: dev
+    project: sigla-reports
+    ref: formazione
+    token: -TP-uthqzexcQz8JGD-p
   ajp:
     port: 8009
     timeout: 120000
