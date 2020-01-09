@@ -4,7 +4,7 @@ spring:
   mail:
     host: smtp.amministrazione.cnr.it
     username: amministrazione_sigla
-    ***REMOVED***
+    password: sigla
     from: sigla@cnr.it
     smtp:
       auth: false
