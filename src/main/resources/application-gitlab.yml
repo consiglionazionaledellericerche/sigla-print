@@ -1,0 +1,7 @@
+cnr:
+  gitlab:
+    url: http://git.si.cnr.it
+    group: dev
+    project: sigla-reports
+    ref: formazione
+    token: -TP-uthqzexcQz8JGD-p

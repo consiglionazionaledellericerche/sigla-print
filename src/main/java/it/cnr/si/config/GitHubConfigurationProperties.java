@@ -17,32 +17,37 @@
 
 package it.cnr.si.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-/**
- * Created by francesco on 12/09/16.
- */
-
 @Configuration
-public class DatabaseConfiguration {
+@ConfigurationProperties(prefix = "cnr.github")
+public class GitHubConfigurationProperties {
+    private String repo;
+    private String token;
+    private String branch;
 
-    private DataSource dataSource;
-
-    @Value("${spring.jpa.properties.hibernate.connection.autocommit}")
-    private Boolean autocommit;
-
-    public DatabaseConfiguration(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public String getToken() {
+        return token;
     }
 
-    public Connection connection() throws SQLException {
-        Connection conn = dataSource.getConnection();
-        conn.setAutoCommit(autocommit);
-        return conn;
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getRepo() {
+        return repo;
+    }
+
+    public void setRepo(String repo) {
+        this.repo = repo;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 }

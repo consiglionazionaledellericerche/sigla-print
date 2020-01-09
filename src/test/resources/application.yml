@@ -1,1 +1,1 @@
-spring.profiles.active: common,test
+spring.profiles.active: common,test,gitlab

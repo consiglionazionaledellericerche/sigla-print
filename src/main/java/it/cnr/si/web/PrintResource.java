@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.si.web;
 
 import it.cnr.si.domain.sigla.PrintSpooler;
@@ -46,7 +63,7 @@ public class PrintResource {
     private PrintStorageService storageService;
 
     @Value("${file.separator}")
-	private String fileSeparator;
+    private String fileSeparator;
 
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
@@ -59,7 +76,7 @@ public class PrintResource {
                 fileName);
         final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
         ByteArrayOutputStream outputStream = printService.print(
-        		printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer), jrFileVirtualizer);
+                printService.jasperPrint(cacheService.jasperReport(printSpooler.getKey()), printSpooler, jrFileVirtualizer), jrFileVirtualizer);
         LOGGER.info("end print request: {} {}", printSpooler.getReport(), printSpooler.getPgStampa());
         return new ResponseEntity<>(outputStream.toByteArray(),
                 headers, HttpStatus.OK);
@@ -80,10 +97,10 @@ public class PrintResource {
             byte[] bytes = IOUtils.toByteArray(inputStream);
             inputStream.close();
             return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
-		} catch (IOException e) {
-			LOGGER.error("Cannot find file: {}", path, e);
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+        } catch (IOException e) {
+            LOGGER.error("Cannot find file: {}", path, e);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
     }
 
@@ -95,9 +112,9 @@ public class PrintResource {
         storageService.delete(path);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
     @GetMapping("/api/v1/get/excel/{name:.+}")
-    public ResponseEntity<byte[]> getxls(@RequestParam String user, @RequestParam String file, @RequestParam(required=false) String command, @PathVariable String name) {
+    public ResponseEntity<byte[]> getxls(@RequestParam String user, @RequestParam String file, @RequestParam(required = false) String command, @PathVariable String name) {
         LOGGER.info("get report from user: {} and name: {}", user, file);
 
         HttpHeaders headers = new HttpHeaders();
@@ -107,22 +124,22 @@ public class PrintResource {
         String path = Arrays.asList(user, file).stream().collect(Collectors.joining(fileSeparator));
 
         try {
-        	if (command != null && command.equalsIgnoreCase("delete")) {
-        	    storageService.delete(path);
-        		return new ResponseEntity<>(HttpStatus.OK);
-        	} else {
+            if (command != null && command.equalsIgnoreCase("delete")) {
+                storageService.delete(path);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
 
                 InputStream inputStream = storageService.get(path);
 
                 byte[] bytes = IOUtils.toByteArray(inputStream);
                 inputStream.close();
                 return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
-        	}
-		} catch (IOException e) {
-			LOGGER.error("Cannot find file: {}", path, e);
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-    }   
+            }
+        } catch (IOException e) {
+            LOGGER.error("Cannot find file: {}", path, e);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @PostMapping("/api/v1/hook")
     public ResponseEntity<String> hook(@RequestBody HookRequest hookRequest) {
@@ -131,7 +148,7 @@ public class PrintResource {
         LOGGER.info("commits: {}", hookRequest.getCommits().stream().map(Commit::getId).collect(Collectors.toList()));
 
         Function<Function<Commit, List<String>>, Stream<String>> files =
-                (mapper)  -> hookRequest.getCommits().stream().map(mapper).flatMap(Collection::stream);
+                (mapper) -> hookRequest.getCommits().stream().map(mapper).flatMap(Collection::stream);
 
         Stream.of(files.apply(Commit::getRemoved), files.apply(Commit::getAdded), files.apply(Commit::getModified))
                 .flatMap(s -> s)
@@ -143,8 +160,6 @@ public class PrintResource {
 
         return ResponseEntity.ok("done");
     }
-
-
 
 
 }

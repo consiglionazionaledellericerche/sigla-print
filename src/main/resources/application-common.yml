@@ -1,12 +1,24 @@
-security.basic.enabled: false
-
-management.info.git.mode: full
-
-spring.application.name: sigla-print
-spring.mail.host: smtp.amministrazione.cnr.it
-spring.mail.username: amministrazione_sigla
-spring.mail.password: sigla
-spring.mail.from: sigla@cnr.it
+spring:
+  application:
+    name: sigla-print
+  mail:
+    host: smtp.amministrazione.cnr.it
+    username: amministrazione_sigla
+    password: sigla
+    from: sigla@cnr.it
+    smtp:
+      auth: false
+  jpa:
+    hibernate.ddl-auto: none # update per generazione schema
+    properties:
+      hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+      hibernate.connection.autocommit: false
+  #  database-platform: org.hibernate.dialect.Oracle10gDialect
+  datasource:
+    url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
+    username: PCIR009
+    password: dbform
+    driverClassName: oracle.jdbc.OracleDriver
 
 print:
   output.dir: ${user.home}/print
@@ -18,30 +30,18 @@ print:
   virtualizer.enable: true
 
 cnr:
-  gitlab:
-    url: http://git.si.cnr.it
-    group: dev
-    project: sigla-reports
-    ref: formazione
-    token: -TP-uthqzexcQz8JGD-p
   ajp:
     port: 8009
     timeout: 120000
-  cache.hazelcast.packages: it.cnr
+  cache:
+    hazelcast:
+      packages: it.cnr
 
 logging.config: classpath:logback-local.xml
 
-spring.jpa:
-  hibernate.ddl-auto: none # update per generazione schema
-  properties:
-    hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
-    hibernate.connection.autocommit: false
-#  database-platform: org.hibernate.dialect.Oracle10gDialect
-
-spring.datasource:
-  url: jdbc:oracle:thin:@dbtest.cedrc.cnr.it:1521:SIGLAF
-  username: PCIR009
-  password: dbform
-  driverClassName: oracle.jdbc.OracleDriver
-
 dir.image: /img/
+
+management:
+  endpoints:
+    web:
+      base-path: /

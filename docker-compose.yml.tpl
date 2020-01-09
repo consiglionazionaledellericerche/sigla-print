@@ -3,7 +3,7 @@ version: '2'
 services:
   siglaprint:
     image: docker.si.cnr.it/##{CONTAINER_ID}##
-    command: java -Duser.country=IT -Duser.language=it -Dfile.encoding=UTF8 -Xmx1g -Xss512k -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8787 -Djava.security.egd=file:/dev/./urandom -jar /opt/sigla-print.war --print.server.url=http://sigla-print.test.si.cnr.it --logging.config=classpath:logback-local.xml --cnr.fs.path=/tmp/stampez/ --spring.profiles.active=common,prod
+    command: java -Duser.country=IT -Duser.language=it -Dfile.encoding=UTF8 -Xmx1g -Xss512k -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8787 -Djava.security.egd=file:/dev/./urandom -jar /opt/sigla-print.war --print.server.url=http://sigla-print.test.si.cnr.it --logging.config=classpath:logback-local.xml --cnr.fs.path=/tmp/stampez/ --spring.profiles.active=common,prod,gitlab
     mem_limit: 1g
     network_mode: bridge
     labels:

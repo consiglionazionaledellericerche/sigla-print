@@ -17,32 +17,16 @@
 
 package it.cnr.si.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-/**
- * Created by francesco on 12/09/16.
- */
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @Configuration
-public class DatabaseConfiguration {
-
-    private DataSource dataSource;
-
-    @Value("${spring.jpa.properties.hibernate.connection.autocommit}")
-    private Boolean autocommit;
-
-    public DatabaseConfiguration(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public Connection connection() throws SQLException {
-        Connection conn = dataSource.getConnection();
-        conn.setAutoCommit(autocommit);
-        return conn;
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests().anyRequest().permitAll();
     }
 }

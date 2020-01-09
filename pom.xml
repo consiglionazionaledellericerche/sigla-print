@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>it.cnr.si.sigla</groupId>
   <artifactId>sigla-print</artifactId>
   <version>1.2.27-SNAPSHOT</version>
   <packaging>war</packaging>
@@ -12,7 +30,7 @@
   <parent>
     <groupId>it.cnr.si</groupId>
     <artifactId>archetype</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.15</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -20,8 +38,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
-    <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
-    <sprint.version>2.3.12</sprint.version>
+    <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+    <sprint.version>3.0.0</sprint.version>
+    <jasperreports.version>6.11.0</jasperreports.version>
   </properties>
 
   <dependencyManagement>
@@ -68,7 +87,7 @@
     <dependency>
       <groupId>net.sf.jasperreports</groupId>
       <artifactId>jasperreports</artifactId>
-      <version>6.1.0</version>
+      <version>${jasperreports.version}</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -77,9 +96,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>ojdbc7</artifactId>
-      <version>12.1.0.2.0</version>
+      <groupId>com.oracle.ojdbc</groupId>
+      <artifactId>ojdbc8</artifactId>
+      <version>19.3.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
@@ -106,6 +125,11 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+      <version>1.4.01</version>
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
@@ -164,72 +188,32 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.chemistry.opencmis</groupId>
-      <artifactId>chemistry-opencmis-client-impl</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.gitlab4j</groupId>
       <artifactId>gitlab4j-api</artifactId>
       <version>4.12.2</version>
     </dependency>
+    <dependency>
+      <groupId>com.jcabi</groupId>
+      <artifactId>jcabi-github</artifactId>
+      <version>0.41</version>
+    </dependency>
+
   </dependencies>
 
   <build>
     <pluginManagement>
       <plugins>
-        <!-- This plugin's configuration is used to store Eclipse m2e settings
-          only. It has no influence on the Maven build itself. Remove when the m2e
-          plugin can correctly bind to Maven lifecycle -->
-
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${spring-boot.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>repackage</goal>
-              </goals>
-              <configuration>
-                <mainClass>${start-class}</mainClass>
-              </configuration>
-            </execution>
-          </executions>
-          <configuration>
-            <mainClass>${start-class}</mainClass>
-          </configuration>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
           <configuration>
             <failOnMissingWebXml>false</failOnMissingWebXml>
-            <packagingExcludes>WEB-INF/lib/tomcat-*.jar</packagingExcludes>
           </configuration>
         </plugin>
 
       </plugins>
     </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
-        <version>2.2.1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>revision</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <verbose>true</verbose>
-          <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
-          <generateGitPropertiesFile>true</generateGitPropertiesFile>
-          <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
