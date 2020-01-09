@@ -1,4 +1,2 @@
-spring.profiles.active: common
-
 logging.config: classpath:logback-local.xml
 

@@ -5,4 +5,4 @@ print:
 
 cnr:
   fs:
-    path: /tmp/stampe/
+    path: ${user.home}/print

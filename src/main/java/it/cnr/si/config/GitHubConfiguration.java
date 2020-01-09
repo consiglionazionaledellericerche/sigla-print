@@ -17,56 +17,56 @@
 
 package it.cnr.si.config;
 
-import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.models.Project;
+import com.jcabi.github.Coordinates;
+import com.jcabi.github.Github;
+import com.jcabi.github.Repo;
+import com.jcabi.github.RtGithub;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 @Configuration
-@ConditionalOnProperty({"cnr.gitlab.url"})
-@EnableConfigurationProperties({GitLabConfigurationProperties.class})
-public class GitLabConfiguration {
+@ConditionalOnProperty({"cnr.github.repo"})
+@EnableConfigurationProperties({GitHubConfigurationProperties.class})
+public class GitHubConfiguration {
     @Autowired
-    private GitLabConfigurationProperties gitLabConfigurationProperties;
+    private GitHubConfigurationProperties gitHubConfigurationProperties;
 
     @Bean
-    public GitLabApi createGitLabApi() {
-        return new GitLabApi(GitLabApi.ApiVersion.V4, gitLabConfigurationProperties.getUrl(), gitLabConfigurationProperties.getToken());
+    public Github createGithub() {
+        return new RtGithub();
     }
 
     @Bean
-    public Project createProject() throws GitLabApiException {
-        return createGitLabApi().getProjectApi().getProject(getGroup(), getProject());
+    public Repo createRepo(Github github) {
+        return github.repos().get(
+                new Coordinates.Simple(gitHubConfigurationProperties.getRepo())
+        );
     }
 
     @Bean
-    public JasperSource createJasperSource(GitLabApi gitLabApi, GitLabConfiguration gitLabConfiguration, Project project) {
+    public JasperSource createJasperSource(Repo repo) {
         return new JasperSource() {
             @Override
             public String getContentAsString(String key) throws Exception {
-                return gitLabApi.getRepositoryFileApi().getFile(project, key, gitLabConfiguration.getRef()).getDecodedContentAsString();
+                return IOUtils.toString(repo.contents().get(key,
+                        Optional.ofNullable(gitHubConfigurationProperties.getBranch()).orElse("master")
+                ).raw(), StandardCharsets.UTF_8.name());
             }
 
             @Override
             public byte[] getContentAsBytes(String key) throws Exception {
-                return gitLabApi.getRepositoryFileApi().getFile(project, key, gitLabConfiguration.getRef()).getDecodedContentAsBytes();
+                return IOUtils.toByteArray(repo.contents().get(key,
+                        Optional.ofNullable(gitHubConfigurationProperties.getBranch()).orElse("master")
+                ).raw());
             }
         };
     }
 
-    public String getGroup() {
-        return gitLabConfigurationProperties.getGroup();
-    }
-
-    public String getProject() {
-        return gitLabConfigurationProperties.getProject();
-    }
-
-    public String getRef() {
-        return gitLabConfigurationProperties.getRef();
-    }
 }
