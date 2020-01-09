@@ -41,6 +41,7 @@
     <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
     <sprint.version>3.0.0</sprint.version>
     <jasperreports.version>6.11.0</jasperreports.version>
+    <start-class>it.cnr.si.SiglaPrintApplication</start-class>
   </properties>
 
   <dependencyManagement>
@@ -210,7 +211,6 @@
             <failOnMissingWebXml>false</failOnMissingWebXml>
           </configuration>
         </plugin>
-
       </plugins>
     </pluginManagement>
     <plugins>
@@ -218,6 +218,19 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <mainClass>${start-class}</mainClass>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>${start-class}</mainClass>
+        </configuration>
       </plugin>
     </plugins>
   </build>
