@@ -3,8 +3,8 @@ spring:
     name: sigla-print
   mail:
     host: smtp.amministrazione.cnr.it
-    username: amministrazione_sigla
-    password: sigla
+    username:
+    password:
     from: sigla@cnr.it
     smtp:
       auth: false
