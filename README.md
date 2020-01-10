@@ -1,4 +1,4 @@
-Sigla print [![Build Status](http://build.si.cnr.it/job/dev-sigla-print-master/badge/icon)](http://build.si.cnr.it/job/dev-sigla-print-master/)
+Sigla print
 ===
 
 # Usage

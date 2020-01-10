@@ -25,7 +25,7 @@ print:
   server.url: http://localhost:8080
   scheduler: 5000
   deletecron: 0 0 2 1/1 * ?
-  queue.priorita: 1,2,3
+  queue.priorita: 1,2,3,4,5
   max.page.size: 1000
   virtualizer.enable: true
 
