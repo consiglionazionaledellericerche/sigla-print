@@ -37,10 +37,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.OptimisticLockException;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -208,8 +205,10 @@ public class ExcelService implements InitializingBean {
                     File output = null;
                     try {
                         output = File.createTempFile(collect, null);
+                        final InputStream inputStream = storageService.get(collect);
                         try (FileOutputStream out = new FileOutputStream(output)) {
-                            IOUtils.copy(storageService.get(collect), out);
+                            IOUtils.copy(inputStream, out);
+                            inputStream.close();
                         }
                         Optional.ofNullable(oldFileName)
                                 .map(nomeFile -> Arrays.asList(excelSpooler.getUtcr(), nomeFile).stream().collect(Collectors.joining(fileSeparator)))

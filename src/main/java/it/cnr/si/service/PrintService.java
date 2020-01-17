@@ -246,8 +246,10 @@ public class PrintService implements InitializingBean {
                     File output = null;
                     try {
                         output = File.createTempFile(collect, null);
+                        final InputStream inputStream = storageService.get(collect);
                         try (FileOutputStream out = new FileOutputStream(output)) {
-                            IOUtils.copy(storageService.get(collect), out);
+                            IOUtils.copy(inputStream, out);
+                            inputStream.close();
                         }
                         Optional.ofNullable(oldFileName)
                                 .map(nomeFile -> Arrays.asList(userName, nomeFile).stream().collect(Collectors.joining(fileSeparator)))
