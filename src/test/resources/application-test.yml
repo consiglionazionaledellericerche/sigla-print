@@ -1,8 +1,23 @@
 logging.config: classpath:logback-test.xml
+spring:
+  mail:
+    host: smtp.amministrazione.cnr.it
+    username:
+    password:
+    from: sigla@cnr.it
+    smtp:
+      auth: false
+  datasource:
+    url: jdbc:oracle:thin:@ORACLE_T:1521:xe
+    username: PCIR009
+    password: PCIR009PSW
 
 print:
   scheduler: 500000
-
+  output.dir: ${user.home}/print
+  queue.priorita: 1,2,3,4,5
 cnr:
   fs:
     path: ${user.home}/print
+
+dir.image: /img/ISS/

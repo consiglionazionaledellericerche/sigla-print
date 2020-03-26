@@ -17,6 +17,7 @@
 
 package it.cnr.si.domain.sigla;
 
+import it.cnr.si.web.PrintThreadLocal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,7 +203,22 @@ public class PrintSpooler {
     @Version
     private Long pg_ver_rec;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @PrePersist
+    void onPrePersist() {
+        this.setDsUtente(PrintThreadLocal.get());
+        this.setUtcr(PrintThreadLocal.get());
+        this.setDacr(new Timestamp(System.currentTimeMillis()));
+        this.setUtuv(PrintThreadLocal.get());
+        this.setDuva(new Timestamp(System.currentTimeMillis()));
+    }
+
+    @PreUpdate
+    void onPreUpdate() {
+        this.setUtuv(this.getDsUtente());
+        this.setDuva(new Timestamp(System.currentTimeMillis()));
+    }
+
+    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.PERSIST)
     @JoinColumn(name = "PG_STAMPA", updatable = false)
     private Set<PrintSpoolerParam> params;
 

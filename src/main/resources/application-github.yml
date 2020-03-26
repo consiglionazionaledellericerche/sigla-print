@@ -1,5 +1,5 @@
 cnr:
   github:
     token:
-    repo: consiglionazionaledellericerche/sigla-reports
-    branch: formazione
+    repo: cirosalvio/sigla-reports
+    branch: master

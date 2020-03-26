@@ -19,10 +19,13 @@ package it.cnr.si.config;
 
 import it.cnr.si.service.ExcelService;
 import it.cnr.si.service.PrintService;
+import it.cnr.si.web.PrintSpooleURLFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -64,5 +67,16 @@ public class PrintConfiguration {
     @Scheduled(cron = "${print.deletecron}")
     public void delete() {
         queueConfiguration.delete();
+    }
+
+    @Bean
+    public FilterRegistrationBean<PrintSpooleURLFilter> filterRegistrationBean() {
+        FilterRegistrationBean <PrintSpooleURLFilter> registrationBean = new FilterRegistrationBean();
+        PrintSpooleURLFilter customURLFilter = new PrintSpooleURLFilter();
+
+        registrationBean.setFilter(customURLFilter);
+        registrationBean.addUrlPatterns("/api/v1/printSpooler/*");
+        registrationBean.setOrder(1); //set precedence
+        return registrationBean;
     }
 }

@@ -19,11 +19,10 @@ package it.cnr.si.service;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import it.cnr.si.config.DatabaseConfiguration;
-import it.cnr.si.domain.sigla.PrintSpooler;
-import it.cnr.si.domain.sigla.PrintState;
-import it.cnr.si.domain.sigla.TipoIntervallo;
+import it.cnr.si.domain.sigla.*;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ParametriEnteRepository;
+import it.cnr.si.repository.PrintParamRepository;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JsonDataSource;
@@ -76,6 +75,8 @@ public class PrintService implements InitializingBean {
     private DatabaseConfiguration databaseConfiguration;
     @Autowired
     private PrintRepository printRepository;
+    @Autowired
+    private PrintParamRepository printParamRepository;
     @Autowired
     private ParametriEnteRepository parametriEnteRepository;
     @Autowired
@@ -414,6 +415,25 @@ public class PrintService implements InitializingBean {
         }
 
     }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Long createPrintSpooler(PrintSpooler printSpoller) {
+        LOGGER.info("Create Record printSpoller: {}", printSpoller);
+        printRepository.save( printSpoller);
+        return printSpoller.getPgStampa();
+    }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public PrintSpooler findPrintSpoolerById(Long pg_stampa) {
+        LOGGER.info("get Record printSpoller: {}", pg_stampa);
+        return printRepository.findById(pg_stampa).orElseThrow(() -> new RuntimeException("Cannot find print with id:" + pg_stampa));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public PrintSpooler updatePrintSpooler(Long pg_stampa,PrintSpooler printSpoller) {
+        LOGGER.info("update Record printSpoller: {}", pg_stampa);
+        PrintSpooler printSpoolerDB= printRepository.findById(pg_stampa).orElseThrow(() -> new RuntimeException("Cannot find print with id:" + pg_stampa));
+        printSpoller.setPgStampa( printSpoolerDB.getPgStampa());
+        return printRepository.save( printSpoller);
+    }
 
 }
