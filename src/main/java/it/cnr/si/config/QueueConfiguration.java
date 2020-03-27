@@ -20,9 +20,13 @@ package it.cnr.si.config;
 import com.hazelcast.core.*;
 import it.cnr.si.domain.sigla.ExcelSpooler;
 import it.cnr.si.domain.sigla.PrintSpooler;
+import it.cnr.si.domain.sigla.PrintSpoolerParam;
+import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
+import it.cnr.si.dto.EventPrintDsJson;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.ExcelService;
 import it.cnr.si.service.PrintService;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.slf4j.Logger;
@@ -32,8 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -59,7 +62,7 @@ public class QueueConfiguration implements InitializingBean {
     @Autowired
     private CacheService cacheService;
 
-    public IQueue<Long> queuePrintApplication(String priorita) {
+    public IQueue queuePrintApplication(String priorita) {
         return hazelcastInstance.getQueue(SIGLA_PRIORITA.concat(priorita));
     }
 
@@ -116,18 +119,47 @@ public class QueueConfiguration implements InitializingBean {
         }
     }
 
-    class PrintApplicationListener implements ItemListener<Long> {
+    class PrintApplicationListener implements ItemListener<Object> {
         private final String priorita;
 
         public PrintApplicationListener(String priorita) {
             this.priorita = priorita;
         }
 
+        private Long getPgStampa( ItemEvent itemEvent ){
+            if ( itemEvent.getItem() instanceof EventPrintDsJson)
+                return  Optional.ofNullable(itemEvent.getItem()).
+                        map(EventPrintDsJson.class::cast).get().getPg_stampa();
+
+             return  Optional.ofNullable(itemEvent.getItem()).
+                     filter(Long.class::isInstance).
+                     map(Long.class::cast).get();
+        }
+
+        private PrintSpooler getPrinSpooler( Long pgStampa,  ItemEvent itemEvent){
+            PrintSpooler print = printService.print(pgStampa);
+            if ( itemEvent.getItem() instanceof EventPrintDsJson){
+                EventPrintDsJson eventPrintDsJson = (EventPrintDsJson) itemEvent.getItem();
+                Set<PrintSpoolerParam> params= print.getParams();
+                 if ( params==null ) {
+                     params = new HashSet<PrintSpoolerParam>();
+                     print.setParams( params);
+                 }
+                   params.removeIf(e->e.getKey().getNomeParam().equalsIgnoreCase(JRParameter.REPORT_DATA_SOURCE));
+                   PrintSpoolerParam param = new PrintSpoolerParam(
+                           new PrintSpoolerParamKey(JRParameter.REPORT_DATA_SOURCE,print)
+                   );
+                   param.setValoreParam( eventPrintDsJson.getJson());
+                   params.add(param);
+
+            }
+            return print;
+        }
         @Override
-        public void itemAdded(ItemEvent<Long> itemEvent) {
-            Long pgStampa = itemEvent.getItem();
+        public void itemAdded(ItemEvent itemEvent) {
+            Long pgStampa = getPgStampa( itemEvent);
             LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
-            boolean removed = queuePrintApplication(priorita).remove(pgStampa);
+            boolean removed = queuePrintApplication(priorita).remove(itemEvent.getItem());
             LOGGER.info("PrintApplicationListener {} {}", pgStampa, removed ? "removed" : "not removed");
             if (removed) {
                 LOGGER.trace("PrintApplicationListener consuming {}", priorita);
@@ -139,10 +171,11 @@ public class QueueConfiguration implements InitializingBean {
                     try {
                         if (lock.tryLock(1, TimeUnit.SECONDS)) {
                             try {
-                                print = printService.print(pgStampa);
+                                //print = printService.print(pgStampa);
+                                print =getPrinSpooler(pgStampa,itemEvent);
                                 if (Optional.ofNullable(print).isPresent()) {
                                     final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
-                                    JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print, jrFileVirtualizer);
+                                        JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print, jrFileVirtualizer);
                                     printService.executeReport(jasperPrint, jrFileVirtualizer, print.getPgStampa(),
                                             print.getName(),
                                             print.getUtcr());
@@ -166,7 +199,7 @@ public class QueueConfiguration implements InitializingBean {
         }
 
         @Override
-        public void itemRemoved(ItemEvent<Long> itemEvent) {
+        public void itemRemoved(ItemEvent<Object> itemEvent) {
             LOGGER.trace("PrintApplicationListener removed {}", itemEvent.getItem());
         }
     }

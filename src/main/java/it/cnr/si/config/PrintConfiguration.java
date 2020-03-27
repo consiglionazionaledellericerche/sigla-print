@@ -75,7 +75,7 @@ public class PrintConfiguration {
         PrintSpooleURLFilter customURLFilter = new PrintSpooleURLFilter();
 
         registrationBean.setFilter(customURLFilter);
-        registrationBean.addUrlPatterns("/api/v1/printSpooler/*");
+        registrationBean.addUrlPatterns("/api/v1/printSpooler/*","/api/v1/get/print/dsOnBody");
         registrationBean.setOrder(1); //set precedence
         return registrationBean;
     }

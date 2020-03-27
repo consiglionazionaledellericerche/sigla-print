@@ -32,25 +32,19 @@ public class PrintSpooleResource {
     @DeleteMapping("/{pg_stampa}")
     public ResponseEntity<String> deletePrintSpooler(@PathVariable Long pg_stampa,
                                                      @RequestHeader("ds-utente") String userName) {
-        try {
-            PrintThreadLocal.set( userName);
+
             printService.deleteReport(pg_stampa);
             return ResponseEntity.ok("done");
-        }finally {
-            PrintThreadLocal.unset();
-        }
+
     }
 
     @PutMapping("/{pg_stampa}")
     public ResponseEntity<PrintSpooler> updatePrintSpooler(@PathVariable Long pg_stampa,
                                                            @RequestBody PrintSpooler printSpooler,
                                                            @RequestHeader("ds-utente") String userName) {
-        try {
-            PrintThreadLocal.set(userName);
+
         return new ResponseEntity<>(printService.updatePrintSpooler(pg_stampa,printSpooler),HttpStatus.OK);
-        }finally {
-            PrintThreadLocal.unset();
-        }
+
     }
 
 }
