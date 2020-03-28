@@ -18,17 +18,15 @@
 package it.cnr.si.config;
 
 import com.hazelcast.core.*;
-import it.cnr.si.domain.sigla.ExcelSpooler;
-import it.cnr.si.domain.sigla.PrintSpooler;
-import it.cnr.si.domain.sigla.PrintSpoolerParam;
-import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
-import it.cnr.si.dto.EventPrintDsJson;
+import it.cnr.si.domain.sigla.*;
+import it.cnr.si.dto.EventPrint;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.ExcelService;
 import it.cnr.si.service.PrintService;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -66,9 +64,14 @@ public class QueueConfiguration implements InitializingBean {
         return hazelcastInstance.getQueue(SIGLA_PRIORITA.concat(priorita));
     }
 
+    public void addEventOnQueue( EventPrint event ){
+        queuePrintApplication(event.getPriotita()).add(event);
+    }
+
     public void queuePrint(String priorita) {
         Optional.ofNullable(printService.print(Integer.valueOf(priorita)))
-                .ifPresent(pgStampa -> queuePrintApplication(priorita).add(pgStampa));
+                .ifPresent(pgStampa -> addEventOnQueue(new EventPrint(priorita,pgStampa,null,false)));
+                //.ifPresent(pgStampa -> queuePrintApplication(priorita).add(pgStampa));
     }
 
     @Override
@@ -119,7 +122,7 @@ public class QueueConfiguration implements InitializingBean {
         }
     }
 
-    class PrintApplicationListener implements ItemListener<Object> {
+    class PrintApplicationListener implements ItemListener<EventPrint> {
         private final String priorita;
 
         public PrintApplicationListener(String priorita) {
@@ -127,52 +130,67 @@ public class QueueConfiguration implements InitializingBean {
         }
 
         private Long getPgStampa( ItemEvent itemEvent ){
-            if ( itemEvent.getItem() instanceof EventPrintDsJson)
+            if ( itemEvent.getItem() instanceof EventPrint)
                 return  Optional.ofNullable(itemEvent.getItem()).
-                        map(EventPrintDsJson.class::cast).get().getPg_stampa();
+                        map(EventPrint.class::cast).get().getPg_stampa();
 
              return  Optional.ofNullable(itemEvent.getItem()).
                      filter(Long.class::isInstance).
                      map(Long.class::cast).get();
         }
 
-        private PrintSpooler getPrinSpooler( Long pgStampa,  ItemEvent itemEvent){
-            PrintSpooler print = printService.print(pgStampa);
-            if ( itemEvent.getItem() instanceof EventPrintDsJson){
-                EventPrintDsJson eventPrintDsJson = (EventPrintDsJson) itemEvent.getItem();
-                Set<PrintSpoolerParam> params= print.getParams();
-                 if ( params==null ) {
-                     params = new HashSet<PrintSpoolerParam>();
-                     print.setParams( params);
-                 }
-                   params.removeIf(e->e.getKey().getNomeParam().equalsIgnoreCase(JRParameter.REPORT_DATA_SOURCE));
-                   PrintSpoolerParam param = new PrintSpoolerParam(
-                           new PrintSpoolerParamKey(JRParameter.REPORT_DATA_SOURCE,print)
-                   );
-                   param.setValoreParam( eventPrintDsJson.getJson());
-                   params.add(param);
+        private PrintSpooler getPrinSpooler( EventPrint event){
+            PrintSpooler printSpooler = printService.print(event.getPg_stampa());
+                Optional.of(printSpooler).
+                        filter(print-> event.getDsDsOnBody()).
+                        ifPresent(
+                                p1->{
+                                    Optional.of(event).filter(json-> StringUtils.isNotEmpty(event.getJson())).
+                                            ifPresent( ev->{
+                                                Optional.ofNullable(printSpooler.getParams()).orElseGet(()->{
+                                                    Set<PrintSpoolerParam> p = new HashSet<PrintSpoolerParam>();
+                                                    PrintSpoolerParam param =new PrintSpoolerParam(new PrintSpoolerParamKey(
+                                                            JRParameter.REPORT_DATA_SOURCE, printSpooler),
+                                                            "",
+                                                            String.class.getCanonicalName());
+                                                    p.add(param);
+                                                    printSpooler.setParams(p);
+                                                    return printSpooler.getParams();
+                                                }).stream().
+                                                        filter(paramO -> paramO.getKey().getNomeParam().equalsIgnoreCase(JRParameter.REPORT_DATA_SOURCE)).
+                                                        findFirst().orElseGet(()->{
+                                                    PrintSpoolerParam param =new PrintSpoolerParam(new PrintSpoolerParamKey(
+                                                            JRParameter.REPORT_DATA_SOURCE, printSpooler),
+                                                            "",
+                                                            String.class.getCanonicalName());
+                                                    printSpooler.getParams().add(param);
+                                                    return param;
+                                                }).
+                                                        setValoreParam( ev.getJson());
+                                            });
+                                });
 
-            }
-            return print;
+            return printSpooler;
         }
         @Override
         public void itemAdded(ItemEvent itemEvent) {
-            Long pgStampa = getPgStampa( itemEvent);
+            EventPrint event = (EventPrint) itemEvent.getItem() ;
+            //Long pgStampa = getPgStampa( itemEvent);
             LOGGER.debug("PrintApplicationListener {} {}", priorita, itemEvent.getEventType().getType());
             boolean removed = queuePrintApplication(priorita).remove(itemEvent.getItem());
-            LOGGER.info("PrintApplicationListener {} {}", pgStampa, removed ? "removed" : "not removed");
+            LOGGER.info("PrintApplicationListener {} {}", event.getPg_stampa(), removed ? "removed" : "not removed");
             if (removed) {
                 LOGGER.trace("PrintApplicationListener consuming {}", priorita);
                 PrintSpooler print = null;
-                if (pgStampa != null) {
-                    String lockKey = PDF.concat(String.valueOf(pgStampa));
+                if (event.getPg_stampa() != null) {
+                    String lockKey = PDF.concat(String.valueOf(event.getPg_stampa()));
                     ILock lock = hazelcastInstance.getLock(lockKey);
                     LOGGER.info("try lock {}", lockKey);
                     try {
                         if (lock.tryLock(1, TimeUnit.SECONDS)) {
                             try {
                                 //print = printService.print(pgStampa);
-                                print =getPrinSpooler(pgStampa,itemEvent);
+                                print =getPrinSpooler(event);
                                 if (Optional.ofNullable(print).isPresent()) {
                                     final JRFileVirtualizer jrFileVirtualizer = printService.fileVirtualizer();
                                         JasperPrint jasperPrint = printService.jasperPrint(cacheService.jasperReport(print.getKey()), print, jrFileVirtualizer);
@@ -199,7 +217,7 @@ public class QueueConfiguration implements InitializingBean {
         }
 
         @Override
-        public void itemRemoved(ItemEvent<Object> itemEvent) {
+        public void itemRemoved(ItemEvent<EventPrint> itemEvent) {
             LOGGER.trace("PrintApplicationListener removed {}", itemEvent.getItem());
         }
     }

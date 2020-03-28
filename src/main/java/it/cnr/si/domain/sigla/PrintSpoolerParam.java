@@ -66,12 +66,6 @@ public class PrintSpoolerParam {
         this.setDuva(new Timestamp(System.currentTimeMillis()));
     }
 
-    @PreUpdate
-    void onPreUpdate() {
-        this.setDuva(new Timestamp(System.currentTimeMillis()));
-    }
-
-
     public PrintSpoolerParam() {
         super();
     }

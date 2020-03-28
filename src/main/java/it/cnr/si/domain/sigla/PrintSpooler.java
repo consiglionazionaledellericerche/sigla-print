@@ -212,12 +212,6 @@ public class PrintSpooler {
         this.setDuva(new Timestamp(System.currentTimeMillis()));
     }
 
-    @PreUpdate
-    void onPreUpdate() {
-        this.setUtuv(this.getDsUtente());
-        this.setDuva(new Timestamp(System.currentTimeMillis()));
-    }
-
     @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.PERSIST)
     @JoinColumn(name = "PG_STAMPA", updatable = false)
     private Set<PrintSpoolerParam> params;
@@ -534,8 +528,8 @@ public class PrintSpooler {
     public boolean canExecute() {
         return Optional.ofNullable(getStato())
                 .map(printState ->
-                        (printState.equals(PrintState.C) && getDtProssimaEsecuzione() == null) ||
-                                ((printState.equals(PrintState.C) || printState.equals(PrintState.S)) &&
+                        ((printState.equals(PrintState.P)||printState.equals(PrintState.C)) && getDtProssimaEsecuzione() == null) ||
+                                ((printState.equals(PrintState.P) ||printState.equals(PrintState.C) || printState.equals(PrintState.S)) &&
                                         getDtProssimaEsecuzione().toInstant().isBefore(Instant.now()))
                 ).orElse(false);
 

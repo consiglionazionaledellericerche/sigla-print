@@ -22,7 +22,7 @@ import it.cnr.si.domain.sigla.PrintSpooler;
 import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
-import it.cnr.si.dto.EventPrintDsJson;
+import it.cnr.si.dto.EventPrint;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
 import it.cnr.si.service.PrintStorageService;
@@ -70,29 +70,32 @@ public class PrintResource {
     @Autowired
     private QueueConfiguration queueConfiguration;
 
-    @PostMapping("/api/v1/get/print/dsOnBody")
-    public ResponseEntity<String> printDsOnBody(@RequestBody PrintSpooler printSpooler,@RequestHeader("ds-utente") String userName) {
+    private EventPrint validateDsOnBody(PrintSpooler printSpooler){
         //Check that is present the DataSourceParameter and tath it isn't Empty
-        String json = Optional.ofNullable(Optional.ofNullable(printSpooler.getParams()).orElse(Collections.emptySet()).stream().
+        String json = Optional.ofNullable(Optional.ofNullable(printSpooler.getParams()).
+                orElseThrow(() -> new RuntimeException("The Parems is null")).stream().
                 filter(paramO -> paramO.getKey().getNomeParam().equalsIgnoreCase(JRParameter.REPORT_DATA_SOURCE)).
                 findFirst().orElseThrow(() -> new RuntimeException("The Report DataSource is null"))).
                 filter(e -> (e.getValoreParam() != null && (!e.getValoreParam().isEmpty()))).
                 orElseThrow(() -> new RuntimeException("The Report DataSource is empty")).getValoreParam();
 
-        PrintSpooler print =null;
-        print = printService.findPrintSpoolerById(printSpooler.getPgStampa());
+        PrintSpooler print =printService.findPrintSpoolerById(printSpooler.getPgStampa());
 
         if (!PrintState.P.equals(print.getStato()))
             throw new RuntimeException("The report hasn't state "+PrintState.P);
-        EventPrintDsJson eventPrintDsJson = new EventPrintDsJson(printSpooler.getPgStampa(),json);
 
-                queueConfiguration.queuePrintApplication(print.getPriorita().toString()).add(eventPrintDsJson);
-             //check
+        EventPrint eventPrintDsJson = new EventPrint(print.getPriorita().toString(),print.getPgStampa(),json,true);
 
-            //Optional.ofNullable( printSpooler.getParams()).map(PrintSpoolerParam ::)
-            return ResponseEntity.ok("done");
-
+        return eventPrintDsJson;
     }
+
+    @PostMapping("/api/v1/get/print/dsOnBody")
+    public ResponseEntity<String> printDsOnBody(@RequestBody PrintSpooler printSpooler,@RequestHeader("ds-utente") String userName) {
+        EventPrint eventPrintDsJson = validateDsOnBody( printSpooler );
+        queueConfiguration.queuePrintApplication(eventPrintDsJson.getPriotita()).add(eventPrintDsJson);
+        return ResponseEntity.ok("done");
+    }
+
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {
         LOGGER.info("start print request: {}", printSpooler);
