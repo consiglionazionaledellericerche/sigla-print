@@ -119,6 +119,7 @@ public class PrintServiceTest {
 
     @Test
     public void testMissioniRimborso() throws JRException, IOException {
+
         PrintSpooler printSpooler = new PrintSpooler((long)5760923);
         printSpooler.setReport("/missioni/RimborsoMissione.jrxml");
         Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();

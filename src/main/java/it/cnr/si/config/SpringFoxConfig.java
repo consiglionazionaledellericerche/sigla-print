@@ -13,9 +13,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class Swagger2UiConfiguration extends WebMvcConfigurerAdapter
-{
-    @Bean
+public class SpringFoxConfig{
+        @Bean
     public Docket api() {
         // @formatter:off
         //Register the controllers to swagger
@@ -27,13 +26,5 @@ public class Swagger2UiConfiguration extends WebMvcConfigurerAdapter
                 // .paths(PathSelectors.ant("/swagger2-demo"))
                 .build();
         // @formatter:on
-    }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry)
-    {
-        //enabling swagger-ui part for visual documentation
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }
