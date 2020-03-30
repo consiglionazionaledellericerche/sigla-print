@@ -1,7 +1,6 @@
 package it.cnr.si.web;
 
 import it.cnr.si.domain.sigla.PrintSpooler;
-import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.service.PrintService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/printSpooler")
-public class PrintSpooleResource {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrintSpooleResource.class);
+public class PrintSpoolerResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrintSpoolerResource.class);
 
     @Autowired
     PrintService printService;
