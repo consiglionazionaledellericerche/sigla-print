@@ -84,7 +84,7 @@ public class PrintResource {
         if (!PrintState.P.equals(print.getStato()))
             throw new RuntimeException("The report hasn't state "+PrintState.P);
 
-        EventPrint eventPrintDsJson = new EventPrint(print.getPriorita().toString(),print.getPgStampa(),json,true);
+        EventPrint eventPrintDsJson = new EventPrint(print.getPrioritaServer().toString(),print.getPgStampa(),json,true);
 
         return eventPrintDsJson;
     }
