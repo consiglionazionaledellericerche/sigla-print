@@ -26,7 +26,9 @@ public enum PrintState {
 
     E("STATO_IN_ERRORE"),
 
-    S("STATO_ESEGUITA");
+    S("STATO_ESEGUITA"),
+
+    P("STATO_IN_CODA_JSON");
 
     public static final List<PrintState> ALL = Collections
             .unmodifiableList(Arrays.asList(values()));

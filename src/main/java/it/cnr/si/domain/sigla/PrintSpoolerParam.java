@@ -17,10 +17,11 @@
 
 package it.cnr.si.domain.sigla;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import it.cnr.si.web.PrintThreadLocal;
+
+import javax.persistence.*;
+import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Table(name = "PRINT_SPOOLER_PARAM")
@@ -37,6 +38,33 @@ public class PrintSpoolerParam {
     // PARAM_TYPE VARCHAR(100)
     @Column(name = "PARAM_TYPE")
     private java.lang.String paramType;
+
+    // VALORE_PARAM VARCHAR(300)
+    @Column(name = "DACR")
+    private Date dacr;
+
+    // VALORE_PARAM VARCHAR(300)
+    @Column(name = "UTCR")
+    private String utcr;
+
+    // VALORE_PARAM VARCHAR(300)
+    @Column(name = "DUVA")
+    private Date duva;
+
+    // VALORE_PARAM VARCHAR(300)
+    @Column(name = "UTUV")
+    private String utuv;
+
+    @Version
+    private Long pg_ver_rec;
+
+    @PrePersist
+    void onPrePersist() {
+        this.setUtcr(PrintThreadLocal.get());
+        this.setUtuv(PrintThreadLocal.get());
+        this.setDacr(new Timestamp(System.currentTimeMillis()));
+        this.setDuva(new Timestamp(System.currentTimeMillis()));
+    }
 
     public PrintSpoolerParam() {
         super();
@@ -77,6 +105,46 @@ public class PrintSpoolerParam {
 
     public void setParamType(java.lang.String paramType) {
         this.paramType = paramType;
+    }
+
+    public Date getDacr() {
+        return dacr;
+    }
+
+    public void setDacr(Date dacr) {
+        this.dacr = dacr;
+    }
+
+    public String getUtcr() {
+        return utcr;
+    }
+
+    public void setUtcr(String utcr) {
+        this.utcr = utcr;
+    }
+
+    public Date getDuva() {
+        return duva;
+    }
+
+    public void setDuva(Date duva) {
+        this.duva = duva;
+    }
+
+    public String getUtuv() {
+        return utuv;
+    }
+
+    public void setUtuv(String utuv) {
+        this.utuv = utuv;
+    }
+
+    public Long getPg_ver_rec() {
+        return pg_ver_rec;
+    }
+
+    public void setPg_ver_rec(Long pg_ver_rec) {
+        this.pg_ver_rec = pg_ver_rec;
     }
 
     @Override

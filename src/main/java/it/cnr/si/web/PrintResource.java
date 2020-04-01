@@ -17,12 +17,16 @@
 
 package it.cnr.si.web;
 
+import it.cnr.si.config.QueueConfiguration;
 import it.cnr.si.domain.sigla.PrintSpooler;
+import it.cnr.si.domain.sigla.PrintState;
 import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
+import it.cnr.si.dto.EventPrint;
 import it.cnr.si.service.CacheService;
 import it.cnr.si.service.PrintService;
 import it.cnr.si.service.PrintStorageService;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -38,9 +42,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,6 +66,35 @@ public class PrintResource {
 
     @Value("${file.separator}")
     private String fileSeparator;
+
+    @Autowired
+    private QueueConfiguration queueConfiguration;
+
+    private EventPrint validateDsOnBody(PrintSpooler printSpooler){
+        //Check that is present the DataSourceParameter and tath it isn't Empty
+        String json = Optional.ofNullable(Optional.ofNullable(printSpooler.getParams()).
+                orElseThrow(() -> new RuntimeException("The Parems is null")).stream().
+                filter(paramO -> paramO.getKey().getNomeParam().equalsIgnoreCase(JRParameter.REPORT_DATA_SOURCE)).
+                findFirst().orElseThrow(() -> new RuntimeException("The Report DataSource is null"))).
+                filter(e -> (e.getValoreParam() != null && (!e.getValoreParam().isEmpty()))).
+                orElseThrow(() -> new RuntimeException("The Report DataSource is empty")).getValoreParam();
+
+        PrintSpooler print =printService.findPrintSpoolerById(printSpooler.getPgStampa());
+
+        if (!PrintState.P.equals(print.getStato()))
+            throw new RuntimeException("The report hasn't state "+PrintState.P);
+
+        EventPrint eventPrintDsJson = new EventPrint(print.getPriorita().toString(),print.getPgStampa(),json,true);
+
+        return eventPrintDsJson;
+    }
+
+    @PostMapping("/api/v1/get/print/dsOnBody")
+    public ResponseEntity<String> printDsOnBody(@RequestBody PrintSpooler printSpooler,@RequestHeader("ds-utente") String userName) {
+        EventPrint eventPrintDsJson = validateDsOnBody( printSpooler );
+        queueConfiguration.queuePrintApplication(eventPrintDsJson.getPriotita()).add(eventPrintDsJson);
+        return ResponseEntity.ok("done");
+    }
 
     @PostMapping("/api/v1/get/print")
     public ResponseEntity<byte[]> print(@RequestBody PrintSpooler printSpooler) {

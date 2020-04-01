@@ -17,6 +17,7 @@
 
 package it.cnr.si.domain.sigla;
 
+import it.cnr.si.web.PrintThreadLocal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,7 +203,16 @@ public class PrintSpooler {
     @Version
     private Long pg_ver_rec;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @PrePersist
+    void onPrePersist() {
+        this.setDsUtente(PrintThreadLocal.get());
+        this.setUtcr(PrintThreadLocal.get());
+        this.setDacr(new Timestamp(System.currentTimeMillis()));
+        this.setUtuv(PrintThreadLocal.get());
+        this.setDuva(new Timestamp(System.currentTimeMillis()));
+    }
+
+    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.PERSIST)
     @JoinColumn(name = "PG_STAMPA", updatable = false)
     private Set<PrintSpoolerParam> params;
 
@@ -518,8 +528,8 @@ public class PrintSpooler {
     public boolean canExecute() {
         return Optional.ofNullable(getStato())
                 .map(printState ->
-                        (printState.equals(PrintState.C) && getDtProssimaEsecuzione() == null) ||
-                                ((printState.equals(PrintState.C) || printState.equals(PrintState.S)) &&
+                        ((printState.equals(PrintState.P)||printState.equals(PrintState.C)) && getDtProssimaEsecuzione() == null) ||
+                                ((printState.equals(PrintState.P) ||printState.equals(PrintState.C) || printState.equals(PrintState.S)) &&
                                         getDtProssimaEsecuzione().toInstant().isBefore(Instant.now()))
                 ).orElse(false);
 

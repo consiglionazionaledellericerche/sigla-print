@@ -17,22 +17,24 @@
 
 package it.cnr.si.web;
 
-import it.cnr.si.domain.sigla.PrintSpooler;
-import it.cnr.si.domain.sigla.PrintSpoolerParam;
-import it.cnr.si.domain.sigla.PrintSpoolerParamKey;
+import it.cnr.si.domain.sigla.*;
 import it.cnr.si.dto.Commit;
 import it.cnr.si.dto.HookRequest;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.sf.jasperreports.engine.JRParameter;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -45,6 +47,8 @@ public class PrintResourceTest {
 
     @Autowired
     private PrintResource printResource;
+
+
 
     //@Test
     public void testPrint() throws Exception {
@@ -63,6 +67,36 @@ public class PrintResourceTest {
         printResource.print(printSpooler);
 
     }
+	@Autowired
+	private PrintSpoolerResource printSpooleResource;
+
+
+
+    @Test
+	public void testPrintJson() throws Exception {
+		PrintSpooler printSpooler = new PrintSpooler();
+
+		printSpooler.setReport("/ordmag/iss/TestJsonDs.jasper");
+		printSpooler.setStato(PrintState.P);
+		printSpooler.setPriorita(1);
+		printSpooler.setPrioritaServer(1);
+		printSpooler.setTiVisibilita(PrintVisibility.P);
+		PrintThreadLocal.set("testJson");
+		ResponseEntity<Long> response = printSpooleResource.createPrintSpooler(printSpooler, "testJson");
+
+		 printSpooler = new PrintSpooler(response.getBody().longValue());
+
+		Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();
+		params.add(new PrintSpoolerParam(new PrintSpoolerParamKey(
+				JRParameter.REPORT_DATA_SOURCE, printSpooler),
+				IOUtils.toString(this.getClass().getResourceAsStream("/testJson/JsonTestJasper.json"), StandardCharsets.UTF_8.name()),
+				String.class.getCanonicalName()));
+		printSpooler.setParams(params);
+
+		System.out.println(Runtime.getRuntime().maxMemory());
+		ResponseEntity r= printResource.printDsOnBody(printSpooler, "testJson");
+
+	}
 
     @Test
     public void testCache() throws Exception {
