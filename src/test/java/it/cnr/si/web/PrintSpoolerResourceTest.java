@@ -36,6 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
@@ -54,7 +55,7 @@ public class PrintSpoolerResourceTest {
 	@Test
 	public void testCreate() throws Exception {
 		PrintSpooler printSpooler = new PrintSpooler();
-		printSpooler.setReport("/doccont/doccont/vpg_man_rev_ass.jasper");
+		printSpooler.setReport("/ordmag/iss/TestJsonDs.jasper");
 		printSpooler.setPriorita(1);
 		printSpooler.setPrioritaServer(1);
 		printSpooler.setTiVisibilita(PrintVisibility.P);
@@ -63,22 +64,24 @@ public class PrintSpoolerResourceTest {
 		printSpooler.setStato(PrintState.P);
 		Set<PrintSpoolerParam> params = new HashSet<PrintSpoolerParam>();
 
+		printSpooler.setParams( params );
+
 		PrintSpoolerParam param = new PrintSpoolerParam();
 		PrintSpoolerParamKey key = new PrintSpoolerParamKey();
 		key.setPrintSpooler(printSpooler);
 		key.setNomeParam("ciao");
 		param.setKey( key);
 		param.setValoreParam("ciaoValue");
+		param.setParamType(String.class.getCanonicalName());
 		params.add(param);
 
 		param = new PrintSpoolerParam();
 		key = new PrintSpoolerParamKey();
 		key.setPrintSpooler(printSpooler);
 		key.setNomeParam("ciao2");
-
-
 		param.setKey( key);
 		param.setValoreParam("ciao2Value");
+		param.setParamType(String.class.getCanonicalName());
 		params.add(param);
 
 		params.add(new PrintSpoolerParam(new PrintSpoolerParamKey(
@@ -90,6 +93,18 @@ public class PrintSpoolerResourceTest {
 		assertTrue(responseEntity.getBody().compareTo(Long.decode("0"))>0);
 	}
 
+	@Test
+	public void testList() {
+		List<Integer> list = Arrays.asList(3, 5, 7, 9, 11);
+		//list= new ArrayList<>();
+		// Using Stream findFirst()
+		Integer res;
+			res = Optional.ofNullable(list).filter(l2-> !l2.isEmpty())
+								.map(l2 -> l2.get(0))
+								//.map(Person::getAge)
+								.orElse(null);
 
+		System.out.println(res);
+	}
 
 }
