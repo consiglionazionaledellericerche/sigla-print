@@ -38,4 +38,8 @@ public interface PrintRepository extends CrudRepository<PrintSpooler, Long> {
             "where p.stato = 'S' " +
             "and p.dtProssimaEsecuzione is null AND p.duva < :dateFrom")
     Iterable<Long> findReportsToDelete(@Param("dateFrom") Date dateFrom);
+
+    @Query("select max(p.pgStampa) + 1 from PrintSpooler p ")
+    Long findMaxPgStampa();
+
 }

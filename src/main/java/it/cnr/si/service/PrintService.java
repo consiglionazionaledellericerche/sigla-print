@@ -416,10 +416,17 @@ public class PrintService implements InitializingBean {
 
     }
     @Transactional(propagation = Propagation.REQUIRED)
-    public Long createPrintSpooler(PrintSpooler printSpoller) {
-        LOGGER.info("Create Record printSpoller: {}", printSpoller);
-        printRepository.save( printSpoller);
-        return printSpoller.getPgStampa();
+    public Long createPrintSpooler(PrintSpooler printSpooler) {
+        LOGGER.info("Create Record printSpooler: {}", printSpooler);
+        if (!Optional.ofNullable(printSpooler)
+                .flatMap(printSpooler1 -> Optional.ofNullable(printSpooler.getPgStampa()))
+                .isPresent()) {
+            printSpooler.setPgStampa(
+                    printRepository.findMaxPgStampa()
+            );
+        }
+        printRepository.save( printSpooler);
+        return printSpooler.getPgStampa();
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

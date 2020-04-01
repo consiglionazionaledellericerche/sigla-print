@@ -93,7 +93,6 @@ public class PrintResourceTest {
 				String.class.getCanonicalName()));
 		printSpooler.setParams(params);
 
-		System.out.println(Runtime.getRuntime().maxMemory());
 		ResponseEntity r= printResource.printDsOnBody(printSpooler, "testJson");
 
 	}
