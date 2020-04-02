@@ -46,7 +46,6 @@ public class PrintSpooler {
      * PG_STAMPA NUMBER (10) {null} NOT NULL Progressivo della stampa
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "PG_STAMPA")
     private java.lang.Long pgStampa;
     /**
