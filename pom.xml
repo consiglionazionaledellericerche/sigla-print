@@ -21,7 +21,7 @@
 
   <groupId>it.cnr.si.sigla</groupId>
   <artifactId>sigla-print</artifactId>
-  <version>2.0.6</version>
+  <version>2.0.7-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>Print and Excel Server</name>
@@ -297,6 +297,6 @@
   <scm>
     <connection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</connection>
     <developerConnection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</developerConnection>
-    <tag>2.0.6</tag>
+    <tag>sigla-print-1.0.7</tag>
   </scm>
 </project>
