@@ -26,6 +26,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Optional;
+
 @Configuration
 @ConditionalOnProperty({"cnr.gitlab.url"})
 @EnableConfigurationProperties({GitLabConfigurationProperties.class})
@@ -48,12 +50,26 @@ public class GitLabConfiguration {
         return new JasperSource() {
             @Override
             public String getContentAsString(String key) throws Exception {
-                return gitLabApi.getRepositoryFileApi().getFile(project, key, gitLabConfiguration.getRef()).getDecodedContentAsString();
+                return gitLabApi.getRepositoryFileApi().getFile(
+                        project,
+                        Optional.ofNullable(key)
+                            .filter(s -> s.startsWith("/"))
+                            .map(s -> s.substring(1))
+                            .orElse(key),
+                        gitLabConfiguration.getRef()
+                ).getDecodedContentAsString();
             }
 
             @Override
             public byte[] getContentAsBytes(String key) throws Exception {
-                return gitLabApi.getRepositoryFileApi().getFile(project, key, gitLabConfiguration.getRef()).getDecodedContentAsBytes();
+                return gitLabApi.getRepositoryFileApi().getFile(
+                        project,
+                        Optional.ofNullable(key)
+                                .filter(s -> s.startsWith("/"))
+                                .map(s -> s.substring(1))
+                                .orElse(key),
+                        gitLabConfiguration.getRef()
+                ).getDecodedContentAsBytes();
             }
         };
     }
