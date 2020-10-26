@@ -19,6 +19,7 @@ package it.cnr.si.web;
 
 import it.cnr.si.domain.sigla.*;
 import net.sf.jasperreports.engine.JRParameter;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
@@ -44,6 +46,7 @@ public class PrintSpoolerResourceTest {
     @Test
     public void testCreate() throws Exception {
         PrintSpooler printSpooler = new PrintSpooler();
+        printSpooler.setPgStampa(BigDecimal.ONE.longValue());
         printSpooler.setReport("/ordmag/iss/TestJsonDs.jasper");
         printSpooler.setPriorita(1);
         printSpooler.setPrioritaServer(1);
@@ -82,4 +85,8 @@ public class PrintSpoolerResourceTest {
         assertTrue(responseEntity.getBody().compareTo(Long.decode("0")) > 0);
     }
 
+    @After
+    public void shutdown() {
+        printSpooleResource.deletePrintSpooler(BigDecimal.ONE.longValue(), "tes");
+    }
 }
