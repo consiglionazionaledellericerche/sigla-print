@@ -332,8 +332,9 @@ public class ExcelSpooler implements Serializable {
                 .map(printState ->
                         (printState.equals(PrintState.C) && getDtProssimaEsecuzione() == null) ||
                                 ((printState.equals(PrintState.C) || printState.equals(PrintState.S)) &&
-                                        getDtProssimaEsecuzione().toInstant().isBefore(Instant.now()))
+                                        Optional.ofNullable(getDtProssimaEsecuzione())
+                                                .map(Timestamp::toInstant)
+                                                .orElse(Instant.now()).isBefore(Instant.now()))
                 ).orElse(false);
-
     }
 }
