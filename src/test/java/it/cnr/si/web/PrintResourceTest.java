@@ -75,7 +75,7 @@ public class PrintResourceTest {
     @Test
 	public void testPrintJson() throws Exception {
 		PrintSpooler printSpooler = new PrintSpooler();
-
+		printSpooler.setPgStampa(Long.valueOf(1));
 		printSpooler.setReport("/ordmag/iss/TestJsonDs.jasper");
 		printSpooler.setStato(PrintState.P);
 		printSpooler.setPriorita(1);
