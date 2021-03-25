@@ -43,6 +43,8 @@ public class PrintSpoolerResourceTest {
     @Autowired
     private PrintSpoolerResource printSpooleResource;
 
+    private Long pgStampa;
+
     @Test
     public void testCreate() throws Exception {
         PrintSpooler printSpooler = new PrintSpooler();
@@ -81,11 +83,12 @@ public class PrintSpoolerResourceTest {
                 String.class.getCanonicalName()));
 
         ResponseEntity<Long> responseEntity = printSpooleResource.createPrintSpooler(printSpooler, "tes");
+        pgStampa = responseEntity.getBody();
         assertTrue(responseEntity.getBody().compareTo(Long.decode("0")) > 0);
     }
 
     @After
     public void shutdown() {
-        printSpooleResource.deletePrintSpooler(BigDecimal.ONE.longValue(), "tes");
+        printSpooleResource.deletePrintSpooler(pgStampa, "tes");
     }
 }
