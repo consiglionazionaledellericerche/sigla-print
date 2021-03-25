@@ -422,7 +422,8 @@ public class PrintService implements InitializingBean {
                 .flatMap(printSpooler1 -> Optional.ofNullable(printSpooler.getPgStampa()))
                 .isPresent()) {
             printSpooler.setPgStampa(
-                    printRepository.findMaxPgStampa()
+                    Optional.ofNullable(printRepository.findMaxPgStampa())
+                        .orElse(BigDecimal.ONE.longValue())
             );
         }
         printRepository.save( printSpooler);

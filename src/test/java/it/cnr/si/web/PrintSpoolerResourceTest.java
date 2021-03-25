@@ -46,7 +46,6 @@ public class PrintSpoolerResourceTest {
     @Test
     public void testCreate() throws Exception {
         PrintSpooler printSpooler = new PrintSpooler();
-        printSpooler.setPgStampa(BigDecimal.ONE.longValue());
         printSpooler.setReport("/ordmag/iss/TestJsonDs.jasper");
         printSpooler.setPriorita(1);
         printSpooler.setPrioritaServer(1);
