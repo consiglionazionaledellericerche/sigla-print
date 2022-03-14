@@ -41,6 +41,7 @@
     <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
     <sprint.version>3.0.1</sprint.version>
     <jasperreports.version>6.11.0</jasperreports.version>
+    <lowagie.itext.version>2.1.7</lowagie.itext.version>
     <start-class>it.cnr.si.SiglaPrintApplication</start-class>
   </properties>
 
@@ -94,7 +95,16 @@
           <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.lowagie</groupId>
+          <artifactId>itext</artifactId>
+        </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.lowagie</groupId>
+      <artifactId>itext</artifactId>
+      <version>${lowagie.itext.version}</version>
     </dependency>
     <dependency>
       <groupId>com.oracle.ojdbc</groupId>
