@@ -18,10 +18,7 @@
 package it.cnr.si.service;
 
 import it.cnr.si.config.DatabaseConfiguration;
-import it.cnr.si.domain.sigla.ExcelSpooler;
-import it.cnr.si.domain.sigla.ExcelSpoolerParam;
-import it.cnr.si.domain.sigla.PrintState;
-import it.cnr.si.domain.sigla.TipoIntervallo;
+import it.cnr.si.domain.sigla.*;
 import it.cnr.si.exception.JasperRuntimeException;
 import it.cnr.si.repository.ExcelRepository;
 import it.cnr.si.repository.ParametriEnteRepository;
@@ -150,8 +147,13 @@ public class ExcelService implements InitializingBean {
                                     .map(columnName -> columnName.substring(columnName.lastIndexOf(".") + 1))
                                     .orElseGet(() -> column.getColumnName())
                     );
-                    String valoreStringa = column.getExcelSpoolerParamColumns().isEmpty() ? valoreRC : valoreRC == null ? valoreRC :
-                            column.getParamColumns(valoreRC);
+                    final List<ExcelSpoolerParamColumn> excelSpoolerParamColumns = excelRepository.findExcelSpoolerParamColumns(column);
+                    String valoreStringa = excelSpoolerParamColumns.isEmpty() ? valoreRC : valoreRC == null ? valoreRC :
+                            excelSpoolerParamColumns
+                                    .stream()
+                                    .filter(excelSpoolerParamColumn -> excelSpoolerParamColumn.getId().getIdKey().equals(valoreRC))
+                                    .map(ExcelSpoolerParamColumn::getValue)
+                                    .findAny().orElse(null);
                     if (valoreStringa != null) {
                         if (column.getColumnType() != null) {
                             if (column.getColumnType().equalsIgnoreCase("VARCHAR")) {
