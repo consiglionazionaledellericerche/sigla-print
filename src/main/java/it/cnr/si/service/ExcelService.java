@@ -154,7 +154,7 @@ public class ExcelService implements InitializingBean {
                                     .filter(espc -> espc.getId().getIdKey().equals(valoreRC))
                                     .filter(espc -> Optional.ofNullable(espc.getValue()).isPresent())
                                     .map(ExcelSpoolerParamColumn::getValue)
-                                    .findAny().orElse(null);
+                                    .findAny().orElse(valoreRC);
                     if (valoreStringa != null) {
                         if (column.getColumnType() != null) {
                             if (column.getColumnType().equalsIgnoreCase("VARCHAR")) {
