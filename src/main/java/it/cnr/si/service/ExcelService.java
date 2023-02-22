@@ -151,7 +151,8 @@ public class ExcelService implements InitializingBean {
                     String valoreStringa = excelSpoolerParamColumns.isEmpty() ? valoreRC : valoreRC == null ? valoreRC :
                             excelSpoolerParamColumns
                                     .stream()
-                                    .filter(excelSpoolerParamColumn -> excelSpoolerParamColumn.getId().getIdKey().equals(valoreRC))
+                                    .filter(espc -> espc.getId().getIdKey().equals(valoreRC))
+                                    .filter(espc -> Optional.ofNullable(espc.getValue()).isPresent())
                                     .map(ExcelSpoolerParamColumn::getValue)
                                     .findAny().orElse(null);
                     if (valoreStringa != null) {
