@@ -186,8 +186,10 @@ public class PrintResource {
                 .distinct()
                 .sorted()
                 .peek(LOGGER::info)
-                .map(map -> fileSeparator.concat(map))
-                .forEach(cacheService::evict);
+                .forEach(s -> {
+                    cacheService.evict(s);
+                    cacheService.evict(fileSeparator.concat(s));
+                });
 
         return ResponseEntity.ok("done");
     }

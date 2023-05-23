@@ -17,6 +17,7 @@
 
 package it.cnr.si.dto;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,9 +27,9 @@ public class Commit {
 
     private String id;
     private String message;
-    private List<String> added;
-    private List<String> modified;
-    private List<String> removed;
+    private List<String> added = Collections.emptyList();
+    private List<String> modified = Collections.emptyList();
+    private List<String> removed = Collections.emptyList();
 
 
     public String getId() {
