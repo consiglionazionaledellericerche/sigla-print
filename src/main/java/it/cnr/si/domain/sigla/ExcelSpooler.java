@@ -96,6 +96,9 @@ public class ExcelSpooler implements Serializable {
     @Column(name = "TI_INTERVALLO")
     private String tiIntervallo;
 
+    @Column(name = "BEFORE_STATEMENT")
+    private String beforeStatement;
+
     private String utcr;
 
     private String utuv;
@@ -299,6 +302,14 @@ public class ExcelSpooler implements Serializable {
 
     public void setExcelSpoolerParams(List<ExcelSpoolerParam> excelSpoolerParams) {
         this.excelSpoolerParams = excelSpoolerParams;
+    }
+
+    public String getBeforeStatement() {
+        return beforeStatement;
+    }
+
+    public void setBeforeStatement(String beforeStatement) {
+        this.beforeStatement = beforeStatement;
     }
 
     public ExcelSpoolerParam addExcelSpoolerParam(ExcelSpoolerParam excelSpoolerParam) {

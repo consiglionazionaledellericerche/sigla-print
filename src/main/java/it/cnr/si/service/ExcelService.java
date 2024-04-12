@@ -122,6 +122,11 @@ public class ExcelService implements InitializingBean {
 
         try {
             conn = databaseConfiguration.connection();
+            if (Optional.ofNullable(excelSpooler.getBeforeStatement()).isPresent()){
+                final CallableStatement callableStatement = conn.prepareCall(excelSpooler.getBeforeStatement());
+                callableStatement.execute();
+            };
+
             statement = conn.createStatement();
             rs = statement.executeQuery(query);
 
